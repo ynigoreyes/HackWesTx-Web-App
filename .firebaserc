@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "dev": "hackwestx-development"
+    "prod": "hackwestx-production"
+  }
+}

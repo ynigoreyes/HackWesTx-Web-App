@@ -1,0 +1,9 @@
+.Clock > div {
+  text-align: center;
+  color: white; }
+
+.Clock .date {
+  font-size: 40px; }
+
+.Clock .time {
+  font-size: small; }

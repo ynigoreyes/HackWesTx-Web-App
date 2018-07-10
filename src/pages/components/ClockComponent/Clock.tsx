@@ -47,14 +47,6 @@ export default class Clock extends React.PureComponent<
     }
     this.checkTime()
   }
-  public render(): JSX.Element {
-    return (
-      <main className="Clock">
-        <h1>{this.state.date}</h1>
-        <h4>{this.state.time}</h4>
-      </main>
-    )
-  }
   /**
    * Generates a time
    * @example 8:45 am
@@ -84,6 +76,15 @@ export default class Clock extends React.PureComponent<
       day += 'th'
     }
     return `${month}, ${day}`
+  }
+
+  public render(): JSX.Element {
+    return (
+      <main className="Clock">
+        <div className='date' >{this.state.date}</div>
+        <div className='time' >{this.state.time}</div>
+      </main>
+    )
   }
 
   // Removes the memory leak with setInterval

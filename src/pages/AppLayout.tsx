@@ -1,24 +1,39 @@
 import * as React from 'react'
 import { Route, Redirect, Switch } from 'react-router-dom'
 import { Layout as AntLayout, Menu, Icon } from 'antd'
-const { Header, Content, Footer, Sider } = AntLayout
+const { Header, Content, Footer } = AntLayout
 
-import HeaderContent from './components/HeaderContent'
 import { Home } from './HomePage/Home'
 import { Events } from './EventsPage/Events'
+import Clock from './components/ClockComponent/Clock'
 interface IAppLayoutState {
   navigate: boolean
   navigateTo?: string
-  collapsed: boolean
+  smallScreen: boolean
 }
 
 class AppLayout extends React.Component<{}, IAppLayoutState> {
   constructor(props) {
     super(props)
     this.state = {
-      collapsed: window.innerWidth >= 768 ? false : true,
+      smallScreen: window.innerWidth >= 768 ? false : true,
       navigate: false,
     }
+    this.updateScreenState = this.updateScreenState.bind(this)
+  }
+  public updateScreenState() {
+    console.log('update')
+    this.setState({
+      smallScreen: window.innerWidth >= 768 ? false : true,
+    })
+  }
+
+  public componentDidMount() {
+    this.updateScreenState()
+    window.addEventListener('resize', this.updateScreenState)
+  }
+  public componentWillUnmount() {
+    window.removeEventListener('resize', this.updateScreenState)
   }
 
   /**
@@ -39,10 +54,6 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
     )
   }
 
-  public onCollapse = (collapsed) => {
-    this.setState({ collapsed })
-  }
-
   public render(): JSX.Element {
     const redirect = <Redirect to={`${this.state.navigateTo}`} />
     const menuItems = [
@@ -57,41 +68,50 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
         key: '/event',
       },
     ]
-    const menuStyles = {
-      marginLeft: '12px',
-    }
     return (
       <AntLayout style={{ minHeight: '100vh' }}>
-        <Sider
-          collapsible={true}
-          collapsed={this.state.collapsed}
-          onCollapse={this.onCollapse}
-        >
-          <Menu theme="dark" defaultSelectedKeys={['/']} mode="inline">
-            {menuItems.map((i) => {
-              return (
-                <Menu.Item onClick={this.handleRoute} key={i.key}>
-                  <Icon type={i.icon} />
-                  <span style={menuStyles} className="labels">
-                    {i.name}
-                  </span>
-                </Menu.Item>
-              )
-            })}
-          </Menu>
-        </Sider>
         <AntLayout>
           <Header
             style={{
               position: 'fixed',
               zIndex: 1,
               width: '100%',
-              paddingRight: '130px',
-              height: '250px',
-              background: '#5d5d5d',
+              height: '232px',
             }}
           >
-            <HeaderContent />
+            <div
+              style={{
+                fontSize: this.state.smallScreen ? '40px' : '72px',
+                color: 'white',
+                textAlign: 'center',
+              }}
+            >
+              HackWesTx
+            </div>
+            <Clock />
+            <Menu
+              theme="dark"
+              defaultSelectedKeys={['/']}
+              mode="horizontal"
+              style={{
+                lineHeight: '40px',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {menuItems.map((i) => {
+                return (
+                  <Menu.Item
+                    style={{ width: '100%', textAlign: 'center' }}
+                    onClick={this.handleRoute}
+                    key={i.key}
+                  >
+                    <Icon type={i.icon} />
+                    <span className="labels">{i.name}</span>
+                  </Menu.Item>
+                )
+              })}
+            </Menu>
           </Header>
           <Content style={{ margin: '0 16px', marginTop: '275px' }}>
             {/* This is where the content will be rendered */}
