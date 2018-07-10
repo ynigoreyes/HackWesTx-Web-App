@@ -1,9 +1,11 @@
-.Clock > div {
-  text-align: center;
-  color: white; }
-
-.Clock .date {
-  font-size: 40px; }
-
-.Clock .time {
-  font-size: small; }
+.Clock {
+  height: 128px; }
+  .Clock > div {
+    text-align: center;
+    color: white; }
+  .Clock .date {
+    font-size: 40px; }
+  .Clock .time {
+    font-size: small; }
+  .Clock .LoadingContent {
+    padding: 21px; }

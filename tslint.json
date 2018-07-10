@@ -10,5 +10,7 @@
     "ordered-imports": false,
     "no-empty-interface": false,
     "jsx-no-multiline-js": false,
+    "object-literal-sort-keys": false,
+    "prefer-const": false
   }
 }

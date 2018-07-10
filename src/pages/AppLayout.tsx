@@ -10,14 +10,16 @@ interface IAppLayoutState {
   navigate: boolean
   navigateTo?: string
   smallScreen: boolean
+  loading: boolean
 }
 
 class AppLayout extends React.Component<{}, IAppLayoutState> {
   constructor(props) {
     super(props)
     this.state = {
-      smallScreen: window.innerWidth >= 768 ? false : true,
       navigate: false,
+      smallScreen: window.innerWidth >= 768 ? false : true,
+      loading: true,
     }
     this.updateScreenState = this.updateScreenState.bind(this)
   }

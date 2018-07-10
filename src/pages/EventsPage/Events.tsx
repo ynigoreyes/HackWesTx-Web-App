@@ -2,11 +2,11 @@ import * as React from 'react'
 import { Timeline } from 'antd'
 import './Events.css'
 
-// interface IEventsProps {}
+interface IEventsProps {}
 
-// interface IEventsState {}
-export class Events extends React.Component {
-  TimeLineItems = [
+interface IEventsState {}
+export class Events extends React.Component<IEventsProps, IEventsState> {
+  private TimeLineItems = [
     {
       content:
         'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur impedit architecto, ut iste magni',
@@ -14,7 +14,8 @@ export class Events extends React.Component {
     },
     {
       content:
-        'nobis explicabo exercitationem! In sapiente, ex dicta accusamus, dolor facilis sint provident, temporibus totam autem explicabo.',
+        `nobis explicabo exercitationem! In sapiente, ex dicta accusamus,
+        dolor facilis sint provident, temporibus totam autem explicabo.`,
       key: 2,
     },
     {
@@ -27,7 +28,7 @@ export class Events extends React.Component {
     super(props)
   }
 
-  render() {
+  public render() {
     return (
       <main className="Events">
         <Timeline>
