@@ -1,30 +1,49 @@
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import { Timeline } from 'antd'
+import './Events.css'
 
-interface IEventsProps {
-  title: string
-}
+interface IEventsProps {}
 
-interface IEventsState {
-  loggedIn: boolean
-}
-
+interface IEventsState {}
 export class Events extends React.Component<IEventsProps, IEventsState> {
-  private relPath: string
+  public TimeLineItems = [
+    {
+      content:
+        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur impedit architecto, ut iste magni',
+      key: 1,
+    },
+    {
+      content:
+        'nobis explicabo exercitationem! In sapiente, ex dicta accusamus, dolor facilis sint provident, temporibus totam autem explicabo.',
+      key: 2,
+    },
+    {
+      content:
+        'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nobis a doloremque non!',
+      key: 3,
+    },
+  ]
   constructor(props) {
     super(props)
-    this.relPath = props.match.url
-    console.log(this.relPath)
-    this.state = {
-      loggedIn: true,
-    }
   }
+
   public render(): JSX.Element {
     return (
-      <div>
-        This is the Events Component
-        <Link to={'/event/more'}>Click Here</Link>
-      </div>
+      <main className="Events">
+        <Timeline>
+          {this.TimeLineItems.map((each) => {
+            return (
+              <Timeline.Item
+                style={{ fontSize: '24px' }}
+                key={each.key}
+                color="green"
+              >
+                <p>{each.content}</p>
+              </Timeline.Item>
+            )
+          })}
+        </Timeline>
+      </main>
     )
   }
 }

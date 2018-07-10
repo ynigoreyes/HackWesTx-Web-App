@@ -1,3 +1,4 @@
+// When changing this file, you must restart WBS
 const tsImportPluginFactory = require("ts-import-plugin");
 const { getLoader } = require("react-app-rewired");
 const rewireLess = require("react-app-rewire-less");
@@ -25,7 +26,27 @@ module.exports = function override(config, env) {
 
   // Override theme here
   config = rewireLess.withLoaderOptions({
-    modifyVars: { "@primary-color": "#1DA57A" },
+    modifyVars: {
+      // "@brand-primary": "#5A1807",
+      "@component-background": "#FFFFFF",
+      // "@error-color": "#5A1807",
+      // "@highlight-color": "#5A1807",
+      "@info-color": "#FFFFFF",
+      // "@normal-color": "#5A1807",
+      "@primary-color": "#5A1807",
+      // "@processing-color": "#5A1807",
+      // "@success-color": "#5A1807",
+      // "@warning-color": "#5A1807",
+      "@text-color": "#000000",
+
+      // Layout
+      "@layout-body-background": "#ffffff",
+      "@layout-header-background": "#252525",
+      "@layout-trigger-background": "#5A1807",
+
+      // Menu Items
+      "@menu-item-color": "#FFFFFF",
+    },
   })(config, env);
 
   return config;
