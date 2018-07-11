@@ -1,16 +1,16 @@
 import * as React from 'react'
+import { connect } from 'react-redux'
 import './Home.css'
 
-export interface IHomeState {
-  loggedIn?: boolean
+export interface IHomeProps {
+  activeLocation: string
+  dispatch: any
 }
+export interface IHomeState {}
 
-export class Home extends React.Component<{}, IHomeState> {
+class Home extends React.Component<IHomeProps, IHomeState> {
   constructor(props) {
     super(props)
-    this.state = {
-      loggedIn: true,
-    }
   }
 
   public render(): JSX.Element {
@@ -20,7 +20,12 @@ export class Home extends React.Component<{}, IHomeState> {
         necessitatibus, consequuntur explicabo odio maxime natus quasi
         reprehenderit sed atque accusamus, ratione a. Dolores temporibus tempore
         perferendis sequi? Rerum, nostrum voluptates.
+        {this.props.activeLocation}
       </div>
     )
   }
 }
+
+const mapStateToProp = ({ activeLocation }) => ({ activeLocation })
+
+export default connect(mapStateToProp)(Home)

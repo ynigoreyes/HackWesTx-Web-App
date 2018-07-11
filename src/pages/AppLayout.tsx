@@ -1,41 +1,33 @@
 import * as React from 'react'
-import { Route, Redirect, Switch } from 'react-router-dom'
+import { Route, Switch, withRouter } from 'react-router-dom'
 import { Layout as AntLayout, Menu, Icon } from 'antd'
 const { Header, Content, Footer } = AntLayout
 
-import { Home } from './HomePage/Home'
-import { Events } from './EventsPage/Events'
+import Home from './HomePage/Home'
+import Events from './EventsPage/Events'
 import Clock from './components/ClockComponent/Clock'
+import { connect } from 'react-redux'
+
+interface IAppLayoutProps {
+  activeLocation: string
+  history: any
+  dispatch: any
+}
 interface IAppLayoutState {
-  navigate: boolean
-  navigateTo?: string
   smallScreen: boolean
-  loading: boolean
 }
 
-class AppLayout extends React.Component<{}, IAppLayoutState> {
+class AppLayout extends React.Component<IAppLayoutProps, IAppLayoutState> {
   constructor(props) {
     super(props)
     this.state = {
-      navigate: false,
       smallScreen: window.innerWidth >= 768 ? false : true,
-      loading: true,
     }
-    this.updateScreenState = this.updateScreenState.bind(this)
   }
-  public updateScreenState() {
-    console.log('update')
+  public updateScreenState = () => {
     this.setState({
       smallScreen: window.innerWidth >= 768 ? false : true,
     })
-  }
-
-  public componentDidMount() {
-    this.updateScreenState()
-    window.addEventListener('resize', this.updateScreenState)
-  }
-  public componentWillUnmount() {
-    window.removeEventListener('resize', this.updateScreenState)
   }
 
   /**
@@ -43,21 +35,15 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
    * Must reset navigate to false once done navigating to prevent stack overflow
    */
   public handleRoute = (e) => {
-    this.setState(
-      {
-        navigate: true,
-        navigateTo: e.key,
-      },
-      () => {
-        this.setState({
-          navigate: false,
-        })
-      },
-    )
+    this.props.dispatch({
+      type: `UPDATE_ACTIVE_ROUTE`,
+      activeLocation: e.key,
+    })
+    const { history } = this.props
+    history.push(e.key)
   }
 
   public render(): JSX.Element {
-    const redirect = <Redirect to={`${this.state.navigateTo}`} />
     const menuItems = [
       {
         icon: 'appstore',
@@ -78,7 +64,7 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
               position: 'fixed',
               zIndex: 1,
               width: '100%',
-              height: '232px',
+              height: '215px',
             }}
           >
             <div
@@ -93,7 +79,7 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
             <Clock />
             <Menu
               theme="dark"
-              defaultSelectedKeys={['/']}
+              defaultSelectedKeys={[`${this.props.activeLocation}`]}
               mode="horizontal"
               style={{
                 lineHeight: '40px',
@@ -115,10 +101,9 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
               })}
             </Menu>
           </Header>
-          <Content style={{ margin: '0 16px', marginTop: '275px' }}>
+          <Content style={{ margin: '0 16px', marginTop: '230px' }}>
             {/* This is where the content will be rendered */}
             <section>
-              {this.state.navigate ? redirect : null}
               <Switch>
                 <Route exact={true} path="/" component={Home} />
                 <Route path="/event" component={Events} />
@@ -130,6 +115,17 @@ class AppLayout extends React.Component<{}, IAppLayoutState> {
       </AntLayout>
     )
   }
+
+  // LifeCycle
+  public componentDidMount() {
+    this.updateScreenState()
+    window.addEventListener('resize', this.updateScreenState)
+  }
+  public componentWillUnmount() {
+    window.removeEventListener('resize', this.updateScreenState)
+  }
 }
 
-export default AppLayout
+const mapStateToProp = ({ activeLocation }) => ({ activeLocation })
+
+export default connect(mapStateToProp)(withRouter(AppLayout))

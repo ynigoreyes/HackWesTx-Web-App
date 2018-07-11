@@ -3,10 +3,17 @@ import * as ReactDOM from 'react-dom'
 
 import './index.css'
 import { Router } from 'react-router'
-import AppLayout from './pages/AppLayout';
+import AppLayout from './pages/AppLayout'
 
-import createHistory from "history/createBrowserHistory"
+// Redux
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import reducer from './redux/reducers'
 
+const store = createStore(reducer)
+
+// History set up
+import createHistory from 'history/createBrowserHistory'
 const history = createHistory()
 
 interface IAppRouteState {
@@ -23,9 +30,11 @@ class AppRouter extends React.Component<{}, IAppRouteState> {
 
   public render(): JSX.Element {
     return (
-      <Router history={history}>
-        <AppLayout />
-      </Router>
+      <Provider store={store}>
+        <Router history={history}>
+          <AppLayout />
+        </Router>
+      </Provider>
     )
   }
 }

@@ -1,16 +1,18 @@
 import * as React from 'react'
 import { Spin } from 'antd'
 import './Clock.css'
+import { connect } from 'react-redux';
 
-interface IClockProps {}
-
+interface IClockProps {
+  dispatch: any
+}
 interface IClockState {
-  date: string | null
-  time: string | null
   loading: boolean
+  date?: string
+  time?: string
 }
 
-export default class Clock extends React.PureComponent<
+class Clock extends React.PureComponent<
   IClockProps,
   IClockState
 > {
@@ -34,11 +36,8 @@ export default class Clock extends React.PureComponent<
   constructor(props) {
     super(props)
     this.state = {
-      date: null,
-      time: null,
       loading: true,
     }
-    console.log(this.state.loading)
     this.checkTime()
   }
 
@@ -49,6 +48,12 @@ export default class Clock extends React.PureComponent<
         date: await this.generateDate(),
         time: await this.generateClock(),
       })
+      this.props.dispatch(
+        {
+          type: `UPDATE_TIME`,
+          currentTime: Date.now(),
+        },
+      )
     }, 1000)
   }
 
@@ -81,7 +86,7 @@ export default class Clock extends React.PureComponent<
       this.setState({
         loading: false,
       })
-    }, 750);
+    }, 1000);
   }
   // Removes the memory leak with setInterval
   public componentWillUnmount() {
@@ -123,3 +128,5 @@ export default class Clock extends React.PureComponent<
     })
   }
 }
+
+export default connect()(Clock)

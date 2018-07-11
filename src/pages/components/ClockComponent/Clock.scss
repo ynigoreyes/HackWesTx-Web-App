@@ -1,5 +1,5 @@
 .Clock {
-  height: 128px;
+  height: 111px;
   > div {
     text-align: center;
     color: white;
@@ -9,6 +9,7 @@
   }
   .time {
     font-size: small;
+    margin-top: -18px;
   }
   .LoadingContent {
     padding: 21px;
