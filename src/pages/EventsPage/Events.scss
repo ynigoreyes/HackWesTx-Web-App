@@ -1,3 +1,9 @@
 .Events {
   margin: 24px;
+  // Event Item Selector
+  .EventTime> {
+    p {
+      font-size: 12px;
+    }
+  }
 }

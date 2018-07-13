@@ -106,6 +106,7 @@ class AppLayout extends React.Component<IAppLayoutProps, IAppLayoutState> {
             <section>
               <Switch>
                 <Route exact={true} path="/" component={Home} />
+                <Route exact={true}path="/event/:activity" component={Events} />
                 <Route path="/event" component={Events} />
               </Switch>
             </section>

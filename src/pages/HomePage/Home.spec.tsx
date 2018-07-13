@@ -1,12 +1,23 @@
 /* tslint:disable */
 require('../../init-test')
-// import { mount, ReactWrapper } from 'enzyme'
-// import * as React from 'react'
-// import { Home, IHomeState } from './Home'
+import { mount, ReactWrapper } from 'enzyme'
+import * as React from 'react'
+import Home from './Home'
+import { createStore } from 'redux';
 
-// Failing test
-// test('Should run a failing test', () => {
-//   const wrapper = mount(<Home title="Hello" />);
-//   const h3 = wrapper.find('h3');
-//   expect(h3.text()).toBe('Oops! This one failed');
-// });
+const initState = () => {
+  return {
+    message: null,
+    activeLocation: '/',
+    currentTime: null,
+  }
+}
+
+const store = createStore(initState, undefined)
+
+test('Should mount', () => {
+  const wrapper: ReactWrapper = mount(
+    <Home store={store} />
+  )
+  expect(wrapper.exists()).toBe(true)
+});

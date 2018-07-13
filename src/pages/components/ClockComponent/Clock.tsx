@@ -30,8 +30,8 @@ class Clock extends React.PureComponent<
     'November',
     'December',
   ]
-  public now: Date
-  public tracker
+  private now: Date
+  private tracker
 
   constructor(props) {
     super(props)

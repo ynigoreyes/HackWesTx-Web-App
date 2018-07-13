@@ -1,2 +1,4 @@
 .Events {
   margin: 24px; }
+  .Events .EventTime > p {
+    font-size: 12px; }
