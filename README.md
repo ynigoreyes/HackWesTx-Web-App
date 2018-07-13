@@ -76,6 +76,11 @@ $ yarn test
 /
 /  Layout.tsx
 /
+/--redux/
+/  --reducers.tsx
+/  --store.tsx
+/  --actions.tsx
+/
 /--services/
 /  --{*http/state*}
 /
