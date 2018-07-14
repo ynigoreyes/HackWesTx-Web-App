@@ -1,8 +1,22 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions'
+import * as express from 'express'
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+import * as cors from 'cors'
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+import calendarRoutes from './routes/schedule.routes'
+
+export const app = express()
+
+dotenv.config({ path: path.join(__dirname, '/.env') })
+
+app.use(cors({origin: true}))
+
+app.use('/api/v1/schedule', calendarRoutes)
+
+app.use((req, res, next) => {
+  next(new Error('Not Found'))
+})
+
+// connect app to firebase
+export const hackwestx = functions.https.onRequest(app)

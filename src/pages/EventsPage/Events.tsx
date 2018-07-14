@@ -3,6 +3,7 @@ import { Timeline, Icon } from 'antd'
 import './Events.css'
 import { connect } from 'react-redux'
 import mock from './mocks/Events.mock'
+import IEventItem from '../../../shared/Event.interface'
 
 interface IEventsProps {
   dispatch?: any
@@ -10,18 +11,9 @@ interface IEventsProps {
 }
 
 interface IEventsState {}
-
-export interface IEventItem {
-  key: number | string
-  title: string
-  ongoing: boolean
-  content: string
-  startTime: number
-  endTime: number
-}
 export class Events extends React.Component<IEventsProps, IEventsState> {
   private timer // A setInterval that we need to stop once the component unmounts
-  private TimeLineItems: IEventItem[]
+  private TimeLineItems: IEventItem[] = []
 
   constructor(props) {
     super(props)
@@ -69,7 +61,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
     let checkTime = new Date(time)
     // This will let us check for changes in the system
     if (checkTime.getMinutes() % 5 === 0) {
-      this.TimeLineItems = []
+      this.TimeLineItems = [] // Replace this with an axios call
       for (let event in this.TimeLineItems) {
         let current = this.TimeLineItems[event]
         if (
