@@ -1,5 +1,5 @@
 import { google } from 'googleapis'
-import { OAuth2Client } from '../../node_modules/google-auth-library'
+import { OAuth2Client } from 'google-auth-library'
 import secrets from './client_secret'
 import credentials from './credentials'
 
@@ -12,7 +12,6 @@ export const loadCredentials = (): Promise<OAuth2Client> => {
       resolve(client)
     } catch (err) {
       console.log('Error loading client secret file:', err)
-      process.exit(1)
     }
   })
 }
@@ -24,7 +23,6 @@ export const loadCredentials = (): Promise<OAuth2Client> => {
 export const authorize = (creds): Promise<OAuth2Client> => {
   return new Promise(async (resolve, reject) => {
     // Gets the information out of the token
-    let token: any
     let oAuth2Client: OAuth2Client
     const { client_secret, client_id, redirect_uris } = creds.installed
     oAuth2Client = new google.auth.OAuth2(

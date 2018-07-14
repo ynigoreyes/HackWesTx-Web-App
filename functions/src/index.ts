@@ -1,6 +1,5 @@
 import * as functions from 'firebase-functions'
 import * as express from 'express'
-import * as dotenv from 'dotenv'
 import * as path from 'path'
 import * as cors from 'cors'
 
@@ -8,7 +7,7 @@ import calendarRoutes from './routes/schedule.routes'
 
 export const app = express()
 
-dotenv.config({ path: path.join(__dirname, '/.env') })
+console.log(functions.config())
 
 app.use(cors({origin: true}))
 

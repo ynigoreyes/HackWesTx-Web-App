@@ -2,22 +2,23 @@
   "name": "hackwestx-functions",
   "scripts": {
     "build": "tsc",
-    "serve": "yarn build && firebase serve --only functions",
-    "shell": "yarn build && firebase functions:shell",
+    "serve": "NODE_ENV=dev yarn clean && yarn build && firebase serve --only functions",
+    "shell": "yarn clean && yarn build && firebase functions:shell",
     "start": "yarn shell",
-    "lint": " ",
+    "clean": "rm -rf lib/",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
   "main": "lib/index.js",
   "dependencies": {
     "axios": "^0.18.0",
+    "axios-retry": "^3.1.1",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
-    "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "firebase-admin": "~5.12.1",
     "firebase-functions": "^1.1.0",
+    "google-auth-library": "^1.6.1",
     "googleapis": "27"
   },
   "devDependencies": {
