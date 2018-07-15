@@ -3,11 +3,31 @@ import { Timeline, Icon } from 'antd'
 import './Events.css'
 import { connect } from 'react-redux'
 import mock from './mocks/Events.mock'
-import IEventItem from '../../../shared/Event.interface'
+
+// Axios Set up
+import axiosRetry from 'axios-retry'
+import axios from 'axios'
+const http = axios.create({
+  baseURL: `https://us-central1-hackwestx-development.cloudfunctions.net/hackwestx`,
+})
+axiosRetry(http, {
+  retryDelay: () => 1000,
+  retries: 5,
+})
+
+export interface IEventItem {
+  key: number | string
+  title: string
+  ongoing: boolean
+  content: string
+  startTime: number
+  endTime: number
+}
 
 interface IEventsProps {
   dispatch?: any
   currentTime: number
+  history?: any
 }
 
 interface IEventsState {}
@@ -17,6 +37,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
   constructor(props) {
     super(props)
+    console.log(this.props)
     const { currentTime } = this.props as any
 
     this.timer =
@@ -36,7 +57,11 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
         className="EventItem"
         key={eachEvent.key}
         color={eachEvent.ongoing ? 'blue' : 'green'}
-        dot={eachEvent.ongoing ? null : (<Icon type="clock-circle-o" style={{ fontSize: '16px' }} />)}
+        dot={
+          eachEvent.ongoing ? null : (
+            <Icon type="clock-circle-o" style={{ fontSize: '16px' }} />
+          )
+        }
       >
         <h2>{eachEvent.title}</h2>
         <p>{eachEvent.content}</p>
@@ -102,9 +127,16 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   }
 }
 
-const mapStateToProp = ({ activeLocation, currentTime }) => ({
-  activeLocation,
-  currentTime,
-})
+const state = (state, ownProps = {}) => {
+  return {
+    currentTime: state.currentTime,
+  }
+}
 
-export default connect(mapStateToProp)(Events)
+// How this works:
+// We connect to redux using "connect" which takes 2 arguments
+// (state, props)
+// State refers to the states in the store, the component can still have an internal state
+// Props (we can usually do a mapDispatchToProps) are actions we can use in the component.
+// accessible through this.props.
+export default connect(state)(Events)

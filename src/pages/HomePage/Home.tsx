@@ -1,14 +1,7 @@
 import * as React from 'react'
-import { connect } from 'react-redux'
 import './Home.css'
 
-export interface IHomeProps {
-  activeLocation: string
-  dispatch: any
-}
-export interface IHomeState {}
-
-class Home extends React.Component<IHomeProps, IHomeState> {
+class Home extends React.Component<{}, {}> {
   constructor(props) {
     super(props)
   }
@@ -20,12 +13,9 @@ class Home extends React.Component<IHomeProps, IHomeState> {
         necessitatibus, consequuntur explicabo odio maxime natus quasi
         reprehenderit sed atque accusamus, ratione a. Dolores temporibus tempore
         perferendis sequi? Rerum, nostrum voluptates.
-        {this.props.activeLocation}
       </div>
     )
   }
 }
 
-const mapStateToProp = ({ activeLocation }) => ({ activeLocation })
-
-export default connect(mapStateToProp)(Home)
+export default Home

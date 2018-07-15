@@ -16,13 +16,13 @@ const reducer = (state = initState, action) => {
     case `UPDATE_TIME`:
       return {
         currentTime: action.currentTime,
+        ...state,
       }
-      break
     case `UPDATE_ACTIVE_ROUTE`:
       return {
         activeLocation: action.activeLocation,
+        ...state,
       }
-      break
     // This is used for testing if I want to set the state of the app
     case `OVERRIDE_STATE_OBJECT`:
       let newStateObject = {}
@@ -32,7 +32,6 @@ const reducer = (state = initState, action) => {
         }
       }
       return newStateObject
-      break
     default:
       return state
   }
