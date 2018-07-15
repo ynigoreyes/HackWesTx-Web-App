@@ -13,7 +13,7 @@ import thunk from 'redux-thunk'
 const history = createBrowserHistory()
 const middleware = routerMiddleware(history)
 
-import reducer from './redux/reducers'
+import { reducer } from './redux/reducers/global.reducers'
 
 import AppLayout from './pages/AppLayout'
 

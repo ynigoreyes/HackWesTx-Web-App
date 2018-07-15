@@ -11,7 +11,7 @@ const initState = {
   currentTime: null,
 }
 
-const reducer = (state = initState, action) => {
+export const reducer = (state = initState, action) => {
   switch (action.type) {
     case `UPDATE_TIME`:
       return {
@@ -36,5 +36,3 @@ const reducer = (state = initState, action) => {
       return state
   }
 }
-
-export default reducer

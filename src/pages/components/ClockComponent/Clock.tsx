@@ -2,10 +2,12 @@ import * as React from 'react'
 import { Spin } from 'antd'
 import './Clock.css'
 import { connect } from 'react-redux';
+import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
 interface IClockProps {
-  dispatch: any
+  updateCurrentTime: (time) => void
 }
+
 interface IClockState {
   loading: boolean
   date?: string
@@ -48,12 +50,7 @@ class Clock extends React.PureComponent<
         date: await this.generateDate(),
         time: await this.generateClock(),
       })
-      this.props.dispatch(
-        {
-          type: `UPDATE_TIME`,
-          currentTime: Date.now(),
-        },
-      )
+      this.props.updateCurrentTime(Date.now)
     }, 1000)
   }
 
@@ -129,4 +126,12 @@ class Clock extends React.PureComponent<
   }
 }
 
-export default connect()(Clock)
+const mapStateToProps = (state) => ({
+  currentTime: state.currentTime,
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  updateCurrentTime,
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Clock)
