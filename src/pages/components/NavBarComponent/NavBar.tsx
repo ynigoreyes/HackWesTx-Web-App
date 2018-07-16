@@ -4,22 +4,30 @@ const AntHeader = AntLayout.Header
 
 import { connect } from "react-redux";
 import { push } from "react-router-redux";
+import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
 import Clock from '../ClockComponent/Clock'
 
 interface INavBarProps {
-  navigateTo: (newLocation) => void
+  navigateTo: (newLocation) => void,
+  updateCurrentTime: (time) => void,
+  currentTime: Date,
 }
 interface INavBarState {
-  smallScreen: boolean
+  smallScreen: boolean,
 }
 
 class NavBar extends React.Component<INavBarProps, INavBarState> {
+
+  private now: Date
+  private tracker: any
+
   constructor(props) {
     super(props)
     this.state = {
       smallScreen: window.innerWidth >= 768 ? false : true,
     }
+    this.checkTime()
   }
   public updateScreenState = () => {
     this.setState({
@@ -28,11 +36,17 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
   }
 
   public handleRoute = (option) => {
-    console.log(option.key)
     this.props.navigateTo(option.key)
   }
 
+  public checkTime = (): void => {
+    this.tracker = setInterval(() => {
+      this.props.updateCurrentTime(Date.now())
+    }, 1000)
+  }
+
   public render(): JSX.Element {
+    let { currentTime } = this.props
     const menuItems = [
       {
         icon: 'appstore',
@@ -64,7 +78,7 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
         >
           HackWesTx
         </div>
-        <Clock />
+        <Clock currentTime={currentTime} />
         <Menu
           theme="dark"
           mode="horizontal"
@@ -97,20 +111,21 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
     window.addEventListener('resize', this.updateScreenState)
   }
   public componentWillUnmount() {
+    clearInterval(this.tracker)
     window.removeEventListener('resize', this.updateScreenState)
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    location: state.location,
-  }
-}
+const mapStateToProps = (state) => ({
+  location: state.location,
+  currentTime: state.currentTime,
+})
 
 const mapDispatchToProps = (dispatch) => ({
   navigateTo: (location) => {
     dispatch(push(location))
   },
+  updateCurrentTime,
 })
 
 export default connect(

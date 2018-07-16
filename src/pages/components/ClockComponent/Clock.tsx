@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
 interface IClockProps {
-  updateCurrentTime: (time) => void
   currentTime: Date,
 }
 
@@ -39,13 +38,6 @@ class Clock extends React.PureComponent<
     this.state = {
       loading: true,
     }
-    this.checkTime()
-  }
-
-  public checkTime = (): void => {
-    this.tracker = setInterval(() => {
-      this.props.updateCurrentTime(Date.now())
-    }, 1000)
   }
 
   public render(): JSX.Element {
@@ -73,33 +65,20 @@ class Clock extends React.PureComponent<
     )
   }
 
-  // Handles loading state
-  public componentDidMount() {
-    setTimeout(() => {
-      this.setState({
-        loading: false,
-      })
-    }, 1000);
-  }
-  // Removes the memory leak with setInterval
-  public componentWillUnmount() {
-    clearInterval(this.tracker)
-  }
-
   /**
    * Generates a time
    * @example 8:45 am
    */
   private generateClock = (): string => {
-      let newDate = new Date(this.props.currentTime)
-      let hours = newDate.getHours()
-      let minutes: any = newDate.getMinutes()
-      let ampm = hours >= 12 ? 'pm' : 'am'
-      hours = hours % 12
-      hours = hours ? hours : 12 // the hour '0' should be '12'
-      minutes = minutes < 10 ? '0' + minutes : minutes
-      let strTime = hours + ':' + minutes + ' ' + ampm
-      return strTime
+    let newDate = new Date(this.props.currentTime)
+    let hours = newDate.getHours()
+    let minutes: any = newDate.getMinutes()
+    let ampm = hours >= 12 ? 'pm' : 'am'
+    hours = hours % 12
+    hours = hours ? hours : 12 // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0' + minutes : minutes
+    let strTime = hours + ':' + minutes + ' ' + ampm
+    return strTime
   }
 
   private generateDate = (): string => {
@@ -117,16 +96,11 @@ class Clock extends React.PureComponent<
       day += 'th'
     }
     let strDate = `${month}, ${day}`
+    this.setState({
+      loading: false,
+    })
     return strDate
   }
 }
 
-const mapStateToProps = (state) => ({
-  currentTime: state.currentTime,
-})
-
-const mapDispatchToProps = (dispatch) => ({
-  updateCurrentTime,
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Clock)
+export default Clock
