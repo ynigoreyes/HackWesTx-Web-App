@@ -1,14 +1,12 @@
 export interface IAppState {
   type: string
-  message: string
   activeLocation: string
   currentTime: number
 }
 
 const initState = {
-  message: null,
   activeLocation: window.location.pathname,
-  currentTime: null,
+  currentTime: Date.now(),
 }
 
 export const reducer = (state = initState, action) => {

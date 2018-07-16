@@ -6,12 +6,11 @@ import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
 interface IClockProps {
   updateCurrentTime: (time) => void
+  currentTime: Date,
 }
 
 interface IClockState {
-  loading: boolean
-  date?: string
-  time?: string
+  loading: boolean,
 }
 
 class Clock extends React.PureComponent<
@@ -44,28 +43,25 @@ class Clock extends React.PureComponent<
   }
 
   public checkTime = (): void => {
-    this.tracker = setInterval(async () => {
-      this.now = new Date()
-      this.setState({
-        date: await this.generateDate(),
-        time: await this.generateClock(),
-      })
-      this.props.updateCurrentTime(Date.now)
+    this.tracker = setInterval(() => {
+      this.props.updateCurrentTime(Date.now())
     }, 1000)
   }
 
   public render(): JSX.Element {
     const mainContent = (
       <div className='MainContent'>
-        <div className="date">{this.state.date}</div>
-        <div className="time">{this.state.time}</div>
+        <div className="date">{this.generateDate()}</div>
+        <div className="time">{this.generateClock()}</div>
       </div>
     )
+
     const loadingContent = (
       <div className='LoadingContent'>
         <Spin size='large' spinning={true} />
       </div>
     )
+
     return (
       <main className="Clock">
         {
@@ -94,9 +90,8 @@ class Clock extends React.PureComponent<
    * Generates a time
    * @example 8:45 am
    */
-  private generateClock = (): Promise<string> => {
-    return new Promise((resolve) => {
-      let newDate = this.now
+  private generateClock = (): string => {
+      let newDate = new Date(this.props.currentTime)
       let hours = newDate.getHours()
       let minutes: any = newDate.getMinutes()
       let ampm = hours >= 12 ? 'pm' : 'am'
@@ -104,25 +99,25 @@ class Clock extends React.PureComponent<
       hours = hours ? hours : 12 // the hour '0' should be '12'
       minutes = minutes < 10 ? '0' + minutes : minutes
       let strTime = hours + ':' + minutes + ' ' + ampm
-      resolve(strTime)
-    })
+      return strTime
   }
 
-  private generateDate = (): Promise<string> => {
-    return new Promise((resolve) => {
-      const month = this.months[this.now.getMonth()]
-      let day = this.now.getDay().toString()
-      if (day[day.length - 1] === '1') {
-        day += 'st'
-      } else if (day[day.length - 1] === '2') {
-        day += 'nd'
-      } else if (day[day.length - 1] === '3') {
-        day += 'rd'
-      } else {
-        day += 'th'
-      }
-      resolve(`${month}, ${day}`)
-    })
+  private generateDate = (): string => {
+    let { currentTime } = this.props
+    let newDate = new Date(currentTime)
+    const month = this.months[newDate.getMonth()]
+    let day = newDate.getDate().toString()
+    if (day[day.length - 1] === '1') {
+      day += 'st'
+    } else if (day[day.length - 1] === '2') {
+      day += 'nd'
+    } else if (day[day.length - 1] === '3') {
+      day += 'rd'
+    } else {
+      day += 'th'
+    }
+    let strDate = `${month}, ${day}`
+    return strDate
   }
 }
 
