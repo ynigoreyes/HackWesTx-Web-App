@@ -1,6 +1,5 @@
 export interface IAppState {
   type: string
-  activeLocation: string
   currentTime: number
 }
 
@@ -14,22 +13,8 @@ export const reducer = (state = initState, action) => {
     case `UPDATE_TIME`:
       return {
         ...state,
-        currentTime: action.currentTime,
+        currentTime: action.payload,
       }
-    case `UPDATE_ACTIVE_ROUTE`:
-      return {
-        ...state,
-        activeLocation: action.activeLocation,
-      }
-    // This is used for testing if I want to set the state of the app
-    case `OVERRIDE_STATE_OBJECT`:
-      let newStateObject = {}
-      for (let prop in action) {
-        if (action.hasOwnProperty(prop) && prop !== 'type') {
-          Object.assign(newStateObject, { [prop] : action[prop] })
-        }
-      }
-      return newStateObject
     default:
       return state
   }

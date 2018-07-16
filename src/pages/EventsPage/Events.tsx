@@ -37,7 +37,6 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
   constructor(props) {
     super(props)
-    console.log(this.props)
     const { currentTime } = this.props as any
 
     this.timer =
@@ -117,13 +116,6 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
         break
       }
     }
-    let debug = this.TimeLineItems.map((each) => {
-      return {
-        startTime: new Date(each.startTime),
-        ...each,
-      }
-    })
-    console.log(debug)
   }
 }
 

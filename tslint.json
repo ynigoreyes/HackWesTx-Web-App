@@ -1,5 +1,5 @@
 {
-  "extends": ["tslint:latest", "tslint-react"],
+  "extends": "tslint-react",
   "rules": {
     // override tslint-react rules here
     "jsx-wrap-multiline": false,

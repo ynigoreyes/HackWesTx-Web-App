@@ -8,6 +8,8 @@ interface IClockProps {
 
 interface IClockState {
   loading: boolean,
+  displayDate: string,
+  displayTime: string,
 }
 
 class Clock extends React.PureComponent<
@@ -30,14 +32,24 @@ class Clock extends React.PureComponent<
   ]
   constructor(props) {
     super(props)
-    this.state = { loading: true }
+    this.state = {
+      loading: true,
+      // this state does not determine anything. It is only for display
+      displayTime: '',
+      displayDate: '',
+    }
+  }
+
+  public componentDidMount() {
+    this.generateClock()
+    this.generateDate()
   }
 
   public render(): JSX.Element {
     const mainContent = (
       <div className='MainContent'>
-        <div className="date">{this.generateDate()}</div>
-        <div className="time">{this.generateClock()}</div>
+        <div className="date">{this.state.displayDate}</div>
+        <div className="time">{this.state.displayTime}</div>
       </div>
     )
 
@@ -62,7 +74,7 @@ class Clock extends React.PureComponent<
    * Generates a time
    * @example 8:45 am
    */
-  private generateClock = (): string => {
+  private generateClock = () => {
     let newDate = new Date(this.props.currentTime)
     let hours = newDate.getHours()
     let minutes: any = newDate.getMinutes()
@@ -71,10 +83,12 @@ class Clock extends React.PureComponent<
     hours = hours ? hours : 12 // the hour '0' should be '12'
     minutes = minutes < 10 ? '0' + minutes : minutes
     let strTime = hours + ':' + minutes + ' ' + ampm
-    return strTime
+    this.setState({
+      displayTime: strTime,
+    })
   }
 
-  private generateDate = (): string => {
+  private generateDate = () => {
     let { currentTime } = this.props
     let newDate = new Date(currentTime)
     const month = this.months[newDate.getMonth()]
@@ -91,8 +105,8 @@ class Clock extends React.PureComponent<
     let strDate = `${month}, ${day}`
     this.setState({
       loading: false,
+      displayDate: strDate,
     })
-    return strDate
   }
 }
 

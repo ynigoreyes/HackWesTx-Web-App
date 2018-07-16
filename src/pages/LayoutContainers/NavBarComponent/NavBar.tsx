@@ -11,6 +11,7 @@ import Clock from './components/ClockComponent/Clock'
 interface INavBarProps {
   navigateTo: (newLocation) => void,
   updateCurrentTime: (time) => void,
+  location: string,
   currentTime: Date,
 }
 interface INavBarState {
@@ -27,7 +28,6 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
     this.state = {
       smallScreen: window.innerWidth >= 768 ? false : true,
     }
-    this.checkTime()
   }
   public updateScreenState = () => {
     this.setState({
@@ -70,8 +70,7 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
       >
         <div
           style={{
-            // fontSize: this.state.smallScreen ? '40px' : '72px',
-            fontSize: '40px',
+            fontSize: this.state.smallScreen ? '40px' : '72px',
             color: 'white',
             textAlign: 'center',
           }}
@@ -82,6 +81,7 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
         <Menu
           theme="dark"
           mode="horizontal"
+          defaultSelectedKeys={[this.props.location]}
           style={{
             lineHeight: '40px',
             display: 'flex',
@@ -108,6 +108,7 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
   // LifeCycle
   public componentDidMount() {
     this.updateScreenState()
+    this.checkTime()
     window.addEventListener('resize', this.updateScreenState)
   }
   public componentWillUnmount() {
@@ -117,7 +118,7 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
 }
 
 const mapStateToProps = (state) => ({
-  location: state.location,
+  location: state.router.location.pathname,
   currentTime: state.currentTime,
 })
 
@@ -125,7 +126,9 @@ const mapDispatchToProps = (dispatch) => ({
   navigateTo: (location) => {
     dispatch(push(location))
   },
-  updateCurrentTime,
+  updateCurrentTime: (time) => {
+    dispatch(updateCurrentTime(time))
+  },
 })
 
 export default connect(
