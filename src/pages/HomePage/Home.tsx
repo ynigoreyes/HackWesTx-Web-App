@@ -1,21 +1,19 @@
 import * as React from 'react'
 import './Home.css'
+import { connect } from 'react-redux'
 
 class Home extends React.Component<{}, {}> {
-  constructor(props) {
-    super(props)
-  }
+ constructor(props) {
+   super(props)
+ }
 
-  public render(): JSX.Element {
-    return (
-      <div>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Suscipit
-        necessitatibus, consequuntur explicabo odio maxime natus quasi
-        reprehenderit sed atque accusamus, ratione a. Dolores temporibus tempore
-        perferendis sequi? Rerum, nostrum voluptates.
-      </div>
+ public render(): JSX.Element {
+   return (
+     <main>
+       Welcome To HackWesTx!!!
+     </main>
     )
   }
 }
 
-export default Home
+export default connect()(Home)

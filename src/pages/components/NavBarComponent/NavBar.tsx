@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { push } from "react-router-redux";
 import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
-import Clock from '../ClockComponent/Clock'
+import Clock from './components/ClockComponent/Clock'
 
 interface INavBarProps {
   navigateTo: (newLocation) => void,

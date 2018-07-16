@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { Spin } from 'antd'
 import './Clock.css'
-import { connect } from 'react-redux';
-import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
 interface IClockProps {
   currentTime: Date,
@@ -30,14 +28,9 @@ class Clock extends React.PureComponent<
     'November',
     'December',
   ]
-  private now: Date
-  private tracker
-
   constructor(props) {
     super(props)
-    this.state = {
-      loading: true,
-    }
+    this.state = { loading: true }
   }
 
   public render(): JSX.Element {

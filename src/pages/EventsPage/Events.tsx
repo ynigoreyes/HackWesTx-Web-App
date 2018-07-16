@@ -127,7 +127,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   }
 }
 
-const state = (state, ownProps = {}) => {
+const state = (state) => {
   return {
     currentTime: state.currentTime,
   }
