@@ -8,7 +8,7 @@ import mock from './mocks/Events.mock'
 import axiosRetry from 'axios-retry'
 import axios from 'axios'
 const http = axios.create({
-  baseURL: `https://us-central1-hackwestx-development.cloudfunctions.net/hackwestx`,
+  baseURL: process.env.REACT_APP_DEV_URL 
 })
 axiosRetry(http, {
   retryDelay: () => 1000,
@@ -39,10 +39,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
     super(props)
     const { currentTime } = this.props as any
 
-    this.timer =
-      process.env.NODE_ENV === 'production'
-        ? setInterval(this.getSchedule(currentTime), 1000)
-        : setInterval(this.getMockSchedule(), 1000)
+    this.timer = setInterval(this.getSchedule(currentTime), 1000)
   }
 
   // Clears setInterval
@@ -55,11 +52,13 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
       <Timeline.Item
         className="EventItem"
         key={eachEvent.key}
-        color={eachEvent.ongoing ? 'blue' : 'green'}
+        color={eachEvent.ongoing
+          ? 'green'
+          : 'blue'}
         dot={
-          eachEvent.ongoing ? null : (
-            <Icon type="clock-circle-o" style={{ fontSize: '16px' }} />
-          )
+          eachEvent.ongoing
+          ? <Icon type="clock-circle-o" style={{ fontSize: '16px' }} />
+          : null
         }
       >
         <h2>{eachEvent.title}</h2>
@@ -82,41 +81,31 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
    * Gets the schedule at every 5 minute interval
    */
   public getSchedule = (time) => {
+    console.log('Check')
     let checkTime = new Date(time)
     // This will let us check for changes in the system
-    if (checkTime.getMinutes() % 5 === 0) {
-      this.TimeLineItems = [] // Replace this with an axios call
-      for (let event in this.TimeLineItems) {
-        let current = this.TimeLineItems[event]
-        if (
-          current.endTime > this.props.currentTime ||
-          (Date.now() && current.startTime < this.props.currentTime) ||
-          Date.now()
-        ) {
-          current.ongoing = true
-          break
+    // if (checkTime.getMinutes() % 5 === 0) {
+      http.get('/api/v1/schedule')
+        .then((res) => {
+          console.log(res.data) 
+          this.TimeLineItems = res.data
+          for (let event in this.TimeLineItems) {
+          let current = this.TimeLineItems[event]
+            if (
+              current.endTime > this.props.currentTime ||
+              (Date.now() && current.startTime < this.props.currentTime) ||
+              Date.now()
+            ) {
+              current.ongoing = true
+              break
+            }
+          }
+        })
+        .catch((err) => {
+          console.error(err)
         }
-      }
+      )
     }
-  }
-
-  /**
-   * Gets the mock schedule
-   */
-  public getMockSchedule = () => {
-    this.TimeLineItems = mock
-    for (let event in this.TimeLineItems) {
-      let current = this.TimeLineItems[event]
-      if (
-        current.endTime > this.props.currentTime ||
-        (Date.now() && current.startTime < this.props.currentTime) ||
-        Date.now()
-      ) {
-        current.ongoing = true
-        break
-      }
-    }
-  }
 }
 
 const state = (state) => {
@@ -125,10 +114,4 @@ const state = (state) => {
   }
 }
 
-// How this works:
-// We connect to redux using "connect" which takes 2 arguments
-// (state, props)
-// State refers to the states in the store, the component can still have an internal state
-// Props (we can usually do a mapDispatchToProps) are actions we can use in the component.
-// accessible through this.props.
 export default connect(state)(Events)
