@@ -20,14 +20,14 @@ export class AppLayout extends React.Component<IAppLayoutProps, IAppLayoutState>
     return (
       <AntLayout style={{ minHeight: '100vh' }}>
         <NavBar context={this.context}/>
-        <Content style={{ margin: '216px 0px' }}>
+        <Content style={{ margin: '216px 0px 0px 0px' }}>
           {/* This is where the content will be rendered */}
           <section>
             <Route exact path="/" component={Home} />
             <Route exact path="/event" component={Events} />
           </section>
         </Content>
-        <Footer style={{ textAlign: 'center' }}>HackWesTx ©2018</Footer>
+        <Footer style={{ textAlign: 'center' }}/>
       </AntLayout>
     )
   }

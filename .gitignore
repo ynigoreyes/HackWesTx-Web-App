@@ -14,6 +14,7 @@ firebase-debug.log
 /functions/lib
 
 # misc
+*.css
 *.swp
 .DS_Store
 .runtimeconfig.json
