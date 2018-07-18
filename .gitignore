@@ -18,7 +18,7 @@ firebase-debug.log
 **/dist
 
 # misc
-api/certs
+/app-api/certs
 *.css
 *.swp
 .DS_Store
