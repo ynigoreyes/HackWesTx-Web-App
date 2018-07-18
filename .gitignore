@@ -1,8 +1,12 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
 # dependencies
-/node_modules
-/functions/node_modules
+**/node_modules
 
 # testing
 /coverage
@@ -10,8 +14,8 @@
 firebase-debug.log
 
 # production
-/build
-/functions/lib
+**/build
+**/dist
 
 # misc
 *.css
