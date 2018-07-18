@@ -1,19 +1,9 @@
 import * as React from 'react'
+import io from 'socket.io-client'
 import { Timeline, Icon } from 'antd'
-import './Events.css'
 import { connect } from 'react-redux'
+import './Events.css'
 import mock from './mocks/Events.mock'
-
-// Axios Set up
-import axiosRetry from 'axios-retry'
-import axios from 'axios'
-const http = axios.create({
-  baseURL: process.env.REACT_APP_DEV_URL 
-})
-axiosRetry(http, {
-  retryDelay: () => 1000,
-  retries: 5,
-})
 
 export interface IEventItem {
   key: number | string
@@ -31,14 +21,18 @@ interface IEventsProps {
 }
 
 interface IEventsState {}
+
 export class Events extends React.Component<IEventsProps, IEventsState> {
   private timer // A setInterval that we need to stop once the component unmounts
   private TimeLineItems: IEventItem[] = []
+  private socket: any
 
   constructor(props) {
     super(props)
     const { currentTime } = this.props as any
-
+    // this.socket = io('https://localhost', {transports: ['websocket', 'polling', 'flashsocket']});
+    this.socket = io.connect('https://localhost') 
+    this.socket.emit('ready', {msg: 'ready'})
     this.timer = setInterval(this.getSchedule(currentTime), 1000)
   }
 
@@ -83,29 +77,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   public getSchedule = (time) => {
     console.log('Check')
     let checkTime = new Date(time)
-    // This will let us check for changes in the system
-    // if (checkTime.getMinutes() % 5 === 0) {
-      http.get('/api/v1/schedule')
-        .then((res) => {
-          console.log(res.data) 
-          this.TimeLineItems = res.data
-          for (let event in this.TimeLineItems) {
-          let current = this.TimeLineItems[event]
-            if (
-              current.endTime > this.props.currentTime ||
-              (Date.now() && current.startTime < this.props.currentTime) ||
-              Date.now()
-            ) {
-              current.ongoing = true
-              break
-            }
-          }
-        })
-        .catch((err) => {
-          console.error(err)
-        }
-      )
-    }
+  }
 }
 
 const state = (state) => {

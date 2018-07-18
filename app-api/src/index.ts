@@ -1,22 +1,14 @@
 import * as express from 'express'
-import { readFileSync } from 'fs'
-import * as path from 'path'
+import Scheduler from './models/schedule.model'
 import * as cors from 'cors'
 import * as https from 'https'
-
-import calendarRoutes from './routes/schedule.routes'
+import * as io from 'socket.io'
+import { readFileSync } from 'fs'
 
 export const app = express()
 
 app.use(cors({origin: true}))
 
-app.use('/api/v1/schedule', calendarRoutes)
-
-app.use((req, res, next) => {
-  next(new Error('Not Found'))
-})
-
-// connect app to firebase
 export default app
 
 const port = process.env.PORT || 8080
@@ -28,7 +20,17 @@ const certOptions = {
   cert: readFileSync(certPath),
 }
 
-const server = https.createServer(certOptions, app)
+export const server = https.createServer(certOptions, app)
 server.listen(port, () => {
   console.log(`Listening on port: ${port}`)
 })
+
+// Websocket
+const socket = io(server)
+let allSockets = []
+socket.on('connection', (ws) => {
+  const origin = ws.handshake.headers.origin
+  console.log(`Connection created from origin: ${origin}`)
+  const newSocket = new Scheduler(ws) 
+})
+
