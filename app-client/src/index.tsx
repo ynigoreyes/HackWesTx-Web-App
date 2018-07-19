@@ -1,5 +1,10 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import * as debug from 'debug'
+
+window.log = debug('dev')
+window.error = debug('error')
+window.info = debug('info')
 
 import './index.css'
 

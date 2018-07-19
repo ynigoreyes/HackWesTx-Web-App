@@ -1,4 +1,5 @@
 import * as oauth from '../config/oauth.config'
+import * as io from 'socket.io'
 import { google } from 'googleapis'
 
 export interface IEventItem {
@@ -15,24 +16,34 @@ class Scheduler {
   private rawSchedule: object[] // Unformated Schedule
   private schedule: IEventItem[] // Formated Schedule
   private calendarId = process.env.CALENDAR_ID
+  private socket
 
-  constructor(currentConn) {
-    currentConn.on('ready', () => {
-      console.log('Ready to pass data')
-    })
-    oauth.loadCredentials().then((auth) => {
-      this.calendar = google.calendar({ version: 'v3', auth })
-      this.setSchedule()
-        .then((GoogleCalendar: object[]) => {
-          this.rawSchedule = GoogleCalendar
-        })
-        .catch((err) => {
-          console.error(err)
-        })
+  /**
+   * Loads up the raw schedule into memory and turns on the event listeners
+   */
+  constructor(currentConn: io.Socket) {
+    this.socket = currentConn
+    oauth.loadCredentials().then(async (auth) => {
+      try {
+        this.calendar = google.calendar({ version: 'v3', auth })
+        this.rawSchedule = await this.setRawSchedule()
+        await this.IOready()
+
+        // When the user refreshed, we send them a packet initially
+        this.IOupdateCalendar({schedule: this.getSchedule()})
+        // setInterval(() => {
+        //   this.IOupdateCalendar({schedule: this.getSchedule()})
+        // }, 5000)
+      } catch(err) {
+        console.log(err)
+      }
     })
   }
 
-  private setSchedule = () => {
+  /**
+   * Sets the raw schedule
+   */
+  private setRawSchedule = (): Promise<object[]> => {
     return new Promise((resolve, reject) => {
       this.calendar.events.list(
         {
@@ -52,18 +63,6 @@ class Scheduler {
     })
   }
 
-  public getSchedule = () => {
-    return new Promise((resolve, reject) => {
-      this.formatSchedule()
-        .then((formatedSchedule: IEventItem[]) => {
-          resolve(formatedSchedule) 
-        })
-        .catch((err) => {
-          reject(err)
-        })
-    })
-  }
-
   public getCalendarList = () => {
     return new Promise((resolve, reject) => {
       this.calendar.calendarList.list((err, { data }) => {
@@ -73,24 +72,37 @@ class Scheduler {
     })
   }
 
-  private formatSchedule = (): Promise<IEventItem[]> => {
-    return new Promise((resolve, reject) => {
-      resolve(
-        this.rawSchedule.map((each: any, i): IEventItem => {
-          return (
-            {
-              key: i + 1,
-              title: each.summary,
-              ongoing: false,
-              content: each.description,
-              startTime: each.start.dateTime,
-              endTime: each.end.dateTime,
-            }
-          )
-        }),
+  private getSchedule = (): IEventItem[] => {
+    return this.rawSchedule.map((each: any, i): IEventItem => {
+      return (
+        {
+          key: i + 1,
+          title: each.summary,
+          ongoing: false,
+          content: each.description,
+          startTime: each.start.dateTime,
+          endTime: each.end.dateTime,
+        }
       )
     })
   }
+
+  private IOready = (): Promise<object> => {
+    return new Promise((resolve, reject) => {
+      this.socket.emit('ready', {msg: 'ready to go'})
+      resolve()
+    })
+  }
+
+  private IOupdateCalendar = (payload: object): Promise<object> => {
+    return new Promise((resolve, reject) => {
+      this.socket.emit('update', payload, (err) => {
+        if (err) reject(err)
+        resolve()
+      })
+    })
+  }
+
 }
 
 export default Scheduler

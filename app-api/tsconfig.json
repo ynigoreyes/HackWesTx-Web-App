@@ -4,8 +4,10 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "rootDir": "src",
+    "allowJs": true,
+    "pretty": true,
     "outDir": "dist",
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "target": "es5"
   },
   "compileOnSave": true,

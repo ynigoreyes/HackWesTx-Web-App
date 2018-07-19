@@ -1,9 +1,10 @@
 import * as React from 'react'
 import io from 'socket.io-client'
+import mock from './mocks/Events.mock'
 import { Timeline, Icon } from 'antd'
 import { connect } from 'react-redux'
+
 import './Events.css'
-import mock from './mocks/Events.mock'
 
 export interface IEventItem {
   key: number | string
@@ -20,25 +21,26 @@ interface IEventsProps {
   history?: any
 }
 
-interface IEventsState {}
+interface IEventsState {
+  TimeLineItems: IEventItem[],
+}
 
 export class Events extends React.Component<IEventsProps, IEventsState> {
-  private timer // A setInterval that we need to stop once the component unmounts
-  private TimeLineItems: IEventItem[] = []
-  private socket: any
+
+  private socket: io.Socket
 
   constructor(props) {
     super(props)
-    const { currentTime } = this.props as any
-    // this.socket = io('https://localhost', {transports: ['websocket', 'polling', 'flashsocket']});
     this.socket = io.connect('https://localhost') 
-    this.socket.emit('ready', {msg: 'ready'})
-    this.timer = setInterval(this.getSchedule(currentTime), 1000)
+    this.state = {
+      TimeLineItems: []
+    }
   }
-
-  // Clears setInterval
-  public componentWillUnmount() {
-    clearInterval(this.timer)
+  
+  public componentDidMount() {
+    this.socket.on('ready', () => {
+      this.watchSchedule()
+    }) 
   }
 
   public formatDateAndComponent = (eachEvent: IEventItem) => {
@@ -62,21 +64,38 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   }
 
   public render() {
+    const { TimeLineItems } = this.state
     return (
       <main className="Events">
         <Timeline>
-          {this.TimeLineItems.map(this.formatDateAndComponent)}
+          {
+            TimeLineItems.map(this.formatDateAndComponent)
+          }
         </Timeline>
       </main>
     )
   }
 
   /**
-   * Gets the schedule at every 5 minute interval
+   * Will update the current schedule when a new schedule is fetched
    */
-  public getSchedule = (time) => {
-    console.log('Check')
-    let checkTime = new Date(time)
+  private watchSchedule = () => {
+    this.socket.on('update', ({schedule}) => {
+      const { currentTime } = this.props
+      for(let prop in schedule) {
+        let startTime = new Date(schedule[prop].startTime).getTime()
+        let endTime = new Date(schedule[prop].endTime).getTime()
+        if (startTime < currentTime && endTime > currentTime) {
+          window.log('found one')
+          schedule[prop].ongoing = true
+          this.setState({
+            TimeLineItems: schedule
+          })
+          break
+        }
+      }
+     
+    })
   }
 }
 
