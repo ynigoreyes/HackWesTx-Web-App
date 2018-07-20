@@ -6,7 +6,6 @@
     "@types/react-redux": "^6.0.4",
     "antd": "^3.6.5",
     "axios": "^0.18.0",
-    "axios-retry": "^3.1.1",
     "connected-react-router": "^4.3.0",
     "debug": "^3.1.0",
     "global": "^4.3.2",

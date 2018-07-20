@@ -9,7 +9,7 @@ docker-compose.yml
 **/node_modules
 
 # testing
-/coverage
+app-api/coverage
 /.vscode
 firebase-debug.log
 

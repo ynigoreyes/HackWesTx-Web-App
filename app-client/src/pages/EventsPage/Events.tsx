@@ -31,7 +31,11 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
   constructor(props) {
     super(props)
-    this.socket = io.connect('https://localhost') 
+    this.socket = io.connect('https://localhost:8080') 
+    this.socket.on('connect', () => {
+      console.log('connected')  
+    })
+    // initial state of no timeline items
     this.state = {
       TimeLineItems: []
     }
@@ -42,7 +46,9 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
       this.watchSchedule()
     }) 
   }
-
+  /**
+   *  Formats the timeline to show the current event
+   */
   public formatDateAndComponent = (eachEvent: IEventItem) => {
     return (
       <Timeline.Item
