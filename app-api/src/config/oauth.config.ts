@@ -2,16 +2,22 @@ import { google } from 'googleapis'
 import { OAuth2Client } from 'google-auth-library'
 import secrets from './client_secret'
 import credentials from './credentials'
+import * as Debug from 'debug'
+
+const logError = Debug('error')
+const logInfo = Debug('info')
+const debug = Debug('dev')
 
 export const loadCredentials = (): Promise<OAuth2Client> => {
   return new Promise(async (resolve) => {
     // Load client secrets from a local file.
     try {
-      console.log('Grabbing Google API credentials...')
+      logInfo('Grabbing Google API credentials...')
       const client = await authorize(secrets)
+      debug(client)
       resolve(client)
     } catch (err) {
-      console.log('Error loading client secret file:', err)
+      logError('Error loading client secret file:', err)
     }
   })
 }
@@ -35,7 +41,7 @@ export const authorize = (creds): Promise<OAuth2Client> => {
       oAuth2Client.setCredentials(credentials)
       resolve(oAuth2Client)
     } catch (err) {
-      console.error(err);
+      logError(err);
       reject(err)
     }
   })

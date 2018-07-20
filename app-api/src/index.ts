@@ -3,13 +3,12 @@ import Scheduler from './models/schedule.model'
 import * as cors from 'cors'
 import * as https from 'https'
 import * as io from 'socket.io'
-import * as debug from 'debug'
+import * as Debug from 'debug'
 import { readFileSync } from 'fs'
 
-// Debugging options
-const logger = debug('dev')
-
 export const app = express()
+
+const debug = Debug('info')
 
 app.use(cors({origin: true}))
 
@@ -23,19 +22,30 @@ const certOptions = {
   cert: readFileSync(certPath),
 }
 
+// Https Server
 export const server = https.createServer(certOptions, app)
 server.listen(port, () => {
-  logger(`Listening on port: ${port}`)
+  debug(`Listening on port: ${port}`)
+  if (process.env.NODE_ENV === 'test') {
+    debug(`Socket: Listening on port: 8000`)
+  }
 })
 
 // Websocket
-const socket = io(server)
-let allSockets = []
+let socket: io.Server = process.env.NODE_ENV === 'test'
+  ? io.listen(8000)
+  : io(server)
+
 socket.on('connection', (ws: io.Socket) => {
+  ws.emit('connect')
 
   const origin = ws.handshake.headers.origin
-  logger(`Connection created from origin: ${origin}`)
+  debug(`Connection created from origin: ${origin}`)
 
   const newSocket = new Scheduler(ws) 
+})
+
+socket.on('disconnect', () => {
+  debug(`${ this.socket.handshake.headers.origin } disconnected`)
 })
 

@@ -1,6 +1,11 @@
 import * as oauth from '../config/oauth.config'
 import * as io from 'socket.io'
 import { google } from 'googleapis'
+import * as Debug from 'debug'
+
+const logError = Debug('error')
+const debug = Debug('dev')
+const logInfo = Debug('info')
 
 export interface IEventItem {
   key: number | string
@@ -12,32 +17,46 @@ export interface IEventItem {
 }
 
 class Scheduler {
-  private calendar: any // Calendar instance
-  private rawSchedule: object[] // Unformated Schedule
-  private schedule: IEventItem[] // Formated Schedule
-  private calendarId = process.env.CALENDAR_ID
-  private socket
+  private calendarId = process.env.CALENDAR_ID  // ID for the HackWesTx Google Calendar
+  private calendar: any                         // Calendar instance
+  private rawSchedule: object[]                 // Unformated Schedule
+  private schedule: IEventItem[]                // Formated Schedule
+  private socket: io.Socket                     // Websocket connection
+  private worker                                // worker to check the calendar for updates
+  private workerPrevent: boolean
 
   /**
    * Loads up the raw schedule into memory and turns on the event listeners
    */
   constructor(currentConn: io.Socket) {
     this.socket = currentConn
-    oauth.loadCredentials().then(async (auth) => {
+    this.socket.on('disconnect', () => {
+      logInfo('stopping worker...')
+      this.workerPrevent = true
+      clearInterval(this.worker)
+    })
+
+   oauth.loadCredentials().then(async (auth) => {
       try {
         this.calendar = google.calendar({ version: 'v3', auth })
         this.rawSchedule = await this.setRawSchedule()
         await this.IOready()
-
-        // When the user refreshed, we send them a packet initially
-        this.IOupdateCalendar({schedule: this.getSchedule()})
-        // setInterval(() => {
-        //   this.IOupdateCalendar({schedule: this.getSchedule()})
-        // }, 5000)
+        debug('Ready to send/recieve information')
+        if (!this.workerPrevent) this.initiateWorkers()
       } catch(err) {
-        console.log(err)
+        logError(err)
       }
     })
+  }
+
+  public initiateWorkers = () => {
+    // When the user refreshed, we send them a packet initially
+    debug('Starting workers...')
+    const schedule: IEventItem[] = this.getSchedule()
+    this.IOupdateCalendar({ schedule })
+    this.worker = setInterval(() => {
+      this.IOupdateCalendar({ schedule })
+    }, 5000)
   }
 
   /**
@@ -58,7 +77,7 @@ class Scheduler {
           } else {
             resolve(data.items || [])
           }
-        },
+        }
       )
     })
   }
@@ -89,20 +108,23 @@ class Scheduler {
 
   private IOready = (): Promise<object> => {
     return new Promise((resolve, reject) => {
-      this.socket.emit('ready', {msg: 'ready to go'})
+      this.socket.emit('ready', { msg: 'ready to go' })
       resolve()
     })
   }
 
-  private IOupdateCalendar = (payload: object): Promise<object> => {
-    return new Promise((resolve, reject) => {
-      this.socket.emit('update', payload, (err) => {
-        if (err) reject(err)
-        resolve()
-      })
-    })
-  }
+  private IOupdateCalendar = (payload: any): void => {
+    if (this.schedule !== payload) {
+      debug('Sending packets')
+      // debug(this.schedule)
+      // debug(payload)
 
+      this.schedule = payload
+      this.socket.emit('update', payload)
+    } else {
+      debug('Holding because of no changes')
+    }
+  }
 }
 
 export default Scheduler
