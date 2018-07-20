@@ -1,4 +1,5 @@
 jest.setTimeout(10000)
+import * as sinon from 'sinon'
 import * as io from 'socket.io-client'
 import * as serverIo from 'socket.io'
 import Scheduler from '../../src/models/schedule.model' 
@@ -31,5 +32,17 @@ describe('Schedule Suite', () => {
    
   it('should connect to socket', () => {
     expect(socket.connected).toBeTruthy()
+  })
+  it('should send back only one list of events', (done) => {
+    // Needs internet to do test or else it won't fetch events from Google Calendar
+    const callback = (update) => {
+      console.log(update)
+      return
+    }
+    socket.emit('update', callback)
+    setTimeout(() => {
+      expect(callback).toHaveBeenCalledTimes(4)
+      done()
+    },7000)
   })
 })

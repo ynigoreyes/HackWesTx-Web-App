@@ -39,6 +39,10 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
     this.state = {
       TimeLineItems: []
     }
+    window.onbeforeunload = () => {
+      this.socket.emit('stop')
+      this.socket.disconnect()
+    }
   }
   
   public componentDidMount() {
@@ -46,6 +50,12 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
       this.watchSchedule()
     }) 
   }
+
+  public componentWillUnmount() {
+    this.socket.emit('stop')
+    this.socket.disconnect()
+  }
+
   /**
    *  Formats the timeline to show the current event
    */
@@ -73,11 +83,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
     const { TimeLineItems } = this.state
     return (
       <main className="Events">
-        <Timeline>
-          {
-            TimeLineItems.map(this.formatDateAndComponent)
-          }
-        </Timeline>
+        <Timeline>{TimeLineItems.map(this.formatDateAndComponent)}</Timeline>
       </main>
     )
   }
@@ -88,9 +94,12 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   private watchSchedule = () => {
     this.socket.on('update', ({schedule}) => {
       const { currentTime } = this.props
+
       for(let prop in schedule) {
+
         let startTime = new Date(schedule[prop].startTime).getTime()
         let endTime = new Date(schedule[prop].endTime).getTime()
+
         if (startTime < currentTime && endTime > currentTime) {
           window.log('found one')
           schedule[prop].ongoing = true
