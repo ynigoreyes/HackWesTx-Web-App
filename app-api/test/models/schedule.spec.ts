@@ -2,7 +2,7 @@ jest.setTimeout(10000)
 import * as sinon from 'sinon'
 import * as io from 'socket.io-client'
 import * as serverIo from 'socket.io'
-import Scheduler from '../../src/models/schedule.model' 
+import Scheduler from '../../src/models/schedule.model'
 
 describe('Schedule Suite', () => {
   let socket: io.Socket 
@@ -21,7 +21,7 @@ describe('Schedule Suite', () => {
       socket.emit('stop')
     })
   })
-  
+
   afterEach((done) => {
     if(socket.connected) {
       console.log('disconnecting')
@@ -35,14 +35,9 @@ describe('Schedule Suite', () => {
   })
   it('should send back only one list of events', (done) => {
     // Needs internet to do test or else it won't fetch events from Google Calendar
-    const callback = (update) => {
-      console.log(update)
-      return
-    }
+    const callback = sinon.spy()
     socket.emit('update', callback)
-    setTimeout(() => {
-      expect(callback).toHaveBeenCalledTimes(4)
-      done()
-    },7000)
+    jest.advanceTimersByTime(10000)
+    expect(callback).toHaveBeenCalledTimes(4)
   })
 })

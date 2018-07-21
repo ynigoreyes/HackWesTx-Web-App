@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { push } from "react-router-redux";
 import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
-import Clock from './components/ClockComponent/Clock'
+import banner from '../../../assets/HackWesTxBannerTransparent.png'
 
 interface INavBarProps {
   navigateTo: (newLocation) => void,
@@ -14,8 +14,15 @@ interface INavBarProps {
   location: string,
   currentTime: Date,
 }
+
 interface INavBarState {
   smallScreen: boolean,
+}
+
+interface IMenuItem {
+  key: string,
+  name: string,
+  icon: string,
 }
 
 class NavBar extends React.Component<INavBarProps, INavBarState> {
@@ -45,6 +52,23 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
     }, 1000)
   }
 
+  /**
+   * Creates the menu items
+   */
+  public createMenu = (item: IMenuItem) => {
+    return (
+      <Menu.Item
+        style={{ width: '100%', textAlign: 'center' }}
+        onClick={this.handleRoute}
+        key={item.key}
+      >
+        <Icon type={item.icon} />
+        <span className="labels">{item.name}</span>
+      </Menu.Item>
+    )
+
+  }
+
   public render(): JSX.Element {
     let { currentTime } = this.props
     const menuItems = [
@@ -59,25 +83,24 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
         key: '/event',
       },
     ]
+
+    const AntHeaderStyles: any = {
+      position: 'fixed',
+      zIndex: 1,
+      width: '100%',
+      height: this.state.smallScreen ? '108px' : '140px',
+    }
+
+    const bannerStyles: any = {
+      width: this.state.smallScreen ? '175px' : '300px',
+      margin: '12px 0px',
+    }
+
     return (
-      <AntHeader
-        style={{
-          position: 'fixed',
-          zIndex: 1,
-          width: '100%',
-          height: '215px',
-        }}
-      >
-        <div
-          style={{
-            fontSize: this.state.smallScreen ? '40px' : '72px',
-            color: 'white',
-            textAlign: 'center',
-          }}
-        >
-          HackWesTx
+      <AntHeader style={AntHeaderStyles} >
+        <div style={{ textAlign: 'center'}}>
+          <img style={bannerStyles} src={banner} alt='HackWesTx Banner'/>
         </div>
-        <Clock currentTime={currentTime} />
         <Menu
           theme="dark"
           mode="horizontal"
@@ -88,18 +111,7 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
             justifyContent: 'center',
           }}
         >
-          {menuItems.map((i) => {
-            return (
-              <Menu.Item
-                style={{ width: '100%', textAlign: 'center' }}
-                onClick={this.handleRoute}
-                key={i.key}
-              >
-                <Icon type={i.icon} />
-                <span className="labels">{i.name}</span>
-              </Menu.Item>
-            )
-          })}
+          {menuItems.map(this.createMenu)}
         </Menu>
       </AntHeader>
     )

@@ -8,6 +8,8 @@ import Events from './EventsPage/Events'
 import NavBar from './LayoutContainers/NavBarComponent/NavBar'
 import Footer from './LayoutContainers/FooterComponent/Footer'
 
+import './AppLayout.css'
+
 interface IAppLayoutProps { }
 interface IAppLayoutState { }
 
@@ -18,9 +20,9 @@ export class AppLayout extends React.Component<IAppLayoutProps, IAppLayoutState>
 
   public render(): JSX.Element {
     return (
-      <AntLayout style={{ minHeight: '100vh' }}>
+      <AntLayout className='Layout' style={{ minHeight: '100vh' }}>
         <NavBar context={this.context}/>
-        <Content style={{ margin: '216px 0px 0px 0px' }}>
+        <Content className='Content'>
           {/* This is where the content will be rendered */}
           <section>
             <Route exact path="/" component={Home} />
