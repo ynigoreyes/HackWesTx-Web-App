@@ -1,7 +1,5 @@
 import * as React from 'react'
-import { Layout as AntLayout, Menu, Icon } from 'antd'
 import './Footer.css'
-const AntFooter = AntLayout.Footer
 
 export const Footer = (props) => {
   return (

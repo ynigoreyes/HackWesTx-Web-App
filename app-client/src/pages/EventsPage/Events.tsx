@@ -1,6 +1,5 @@
 import * as React from 'react'
 import io from 'socket.io-client'
-import mock from './mocks/Events.mock'
 import { Timeline, Icon } from 'antd'
 import { connect } from 'react-redux'
 
@@ -31,9 +30,9 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
   constructor(props) {
     super(props)
-    this.socket = io.connect('https://localhost:8080') 
+    this.socket = io.connect('https://localhost:8080')
     this.socket.on('connect', () => {
-      console.log('connected')  
+      console.log('connected')
     })
     // initial state of no timeline items
     this.state = {

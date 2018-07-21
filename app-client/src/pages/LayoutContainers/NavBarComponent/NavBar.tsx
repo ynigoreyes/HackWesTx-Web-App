@@ -27,7 +27,6 @@ interface IMenuItem {
 
 class NavBar extends React.Component<INavBarProps, INavBarState> {
 
-  private now: Date
   private tracker: any
 
   constructor(props) {
@@ -70,7 +69,6 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
   }
 
   public render(): JSX.Element {
-    let { currentTime } = this.props
     const menuItems = [
       {
         icon: 'appstore',

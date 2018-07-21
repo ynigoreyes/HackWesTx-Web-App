@@ -1,6 +1,6 @@
 import * as React from 'react'
 import GridItem from './components/SponsorGridItem'
-import { Row, Col } from 'antd'
+import { Row } from 'antd'
 
 class Sponsors extends React.Component<{}, {}> {
   constructor(props) {
@@ -45,7 +45,7 @@ class Sponsors extends React.Component<{}, {}> {
       key={each.cardTitle}
       cardTitle={each.cardTitle}
       cardImage={each.cardImage}
-    /> 
+    />
     )
   }
 
