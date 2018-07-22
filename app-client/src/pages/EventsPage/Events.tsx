@@ -28,14 +28,20 @@ interface IEventsState {
 export class Events extends React.Component<IEventsProps, IEventsState> {
 
   private socket: io.Socket
+  private id: string
 
   constructor(props) {
     super(props)
     this.socket = io.connect('https://localhost:8080')
     this.socket.on('connect', () => {
-      console.log('connected')
+      window.log('connected')
+    })
+    this.socket.on('notify_connection', (id) => {
+      window.log(id)
+      this.id = id
     })
     this.watchSchedule()
+
     // initial state of no timeline items
     this.state = {
       TimeLineItems: [],
@@ -44,13 +50,14 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
     // Handles the reload
     window.onbeforeunload = () => {
-      this.socket.emit('stop')
+      this.socket.emit('leave', this.id)
       this.socket.disconnect()
     }
   }
 
   public componentWillUnmount() {
-    this.socket.emit('stop')
+    window.log('Unmounting')
+    this.socket.emit('leave', this.id)
     this.socket.disconnect()
   }
 

@@ -1,3 +1,4 @@
+// TODO: Once we start rejecting dispatches, we are getting Null errors in getSchedule
 import * as oauth from '../config/oauth.config'
 import * as io from 'socket.io'
 import { google } from 'googleapis'
@@ -8,7 +9,8 @@ const logError = Debug('error')
 const debug = Debug('dev')
 const logInfo = Debug('info')
 
-const updateFrequency = process.env.NODE_ENV === 'dev' ? 3000 : 1000 * 60
+const dispatchFrequency = process.env.NODE_ENV === 'dev' ? 3000 : 2000
+const fetchFrequency = process.env.NODE_ENV === 'dev' ? 5000 : 1000
 
 export interface IEventItem {
   key: number | string
@@ -31,70 +33,65 @@ let EventSkeleton = {
 class Scheduler {
   private calendarId = process.env.CALENDAR_ID  // ID for the HackWesTx Google Calendar
   private calendar: any                         // Calendar instance
-  private rawSchedule: object[]                 // Unformated Schedule
   private schedule: IEventItem[]                // Formated Schedule
+  public rawSchedule: object[]                 // Unformated Schedule
 
-  private socket: io.Socket                     // Websocket connection
-
-  private rawCalendarWorker                     // worker to check the actual calendar
-  private formatedCalendarWorker                // worker to check the calendar for updates
-  private workerPrevent: boolean
+  public rawCalendarWorker                      // worker to check the actual calendar
+  public formatedCalendarWorker                 // worker to check the calendar for updates
+  public workerPrevent: boolean                 // Prevents the workers from spawning
 
   /**
-   * Loads up the raw schedule into memory and turns on the event listeners
+   * Creates a calendar
    */
-  constructor(currentConn: io.Socket, auth) {
-    this.socket = currentConn
-    this.socket.on('stop', () => {
-      logInfo('stopping worker...')
-      this.workerPrevent = true
-      this.socket.disconnect(true)
-      clearInterval(this.formatedCalendarWorker)
-      clearInterval(this.rawCalendarWorker)
-    })
-
-
+  constructor(auth) {
     this.calendar = google.calendar({ version: 'v3', auth })
-    this.setRawSchedule()
-      .then((schedule) => {
-        this.rawSchedule = schedule
-        if (!this.workerPrevent) this.initiateWorkers()
-      })
-      .catch((err) => {
-        logError(err)
-      })
   }
 
-  public initiateWorkers = async() => {
+  /*
+   * Initiates the workers to start sending packets to the client
+   * @parmas { boolean } controller - determines whether or not to start or stop the workers
+   * @parmas { io.Server } socket - the server instance
+   */
+  public initiateWorkers = async (controller: boolean, socket: io.Server) => {
     // When the user refreshed, we send them a packet initially
-    debug('Starting workers...')
-    try {
-      this.rawCalendarWorker = setInterval( async () => {
-        this.rawSchedule = await this.setRawSchedule()
-      }, 5000)
+    if (controller && !this.workerPrevent) {
+      debug('Starting workers...')
+      try {
+        this.rawCalendarWorker = setInterval( async () => {
+          this.rawSchedule = await this.setRawSchedule()
+        }, fetchFrequency )
 
-      let previousFetch = await this.getSchedule()
-      updateCalendar(this.socket, previousFetch)
-      debug(previousFetch)
-      // Update the schedule and check if it changes
-      this.formatedCalendarWorker = setInterval( async () => {
-        this.schedule = await this.getSchedule()
-        this.compareSchedule(this.schedule, previousFetch)
-        if (!this.compareSchedule(this.schedule, previousFetch)) {
+        let previousFetch = await this.getSchedule()
+        updateCalendar(socket, previousFetch)
+
+        // Update the schedule and check if it changes
+        this.formatedCalendarWorker = setInterval( async () => {
+          this.schedule = await this.getSchedule()
+          this.compareSchedule(this.schedule, previousFetch)
+
           debug('Sending packets...')
-          updateCalendar(this.socket, this.schedule)
-          previousFetch = this.schedule
-        } else {
-          debug('Rejecting...')
-        }
-      }, updateFrequency )
-    } catch(err) {
-      logError(err)
-      this.socket.emit('error', { err })
+          updateCalendar(socket, this.schedule)
+
+        }, dispatchFrequency )
+
+      } catch(err) {
+        logError(err)
+        socket.emit('error', { err })
+      }
+    } else {
+      clearInterval(this.rawCalendarWorker)
+      clearInterval(this.formatedCalendarWorker)
+      // So we can easily check if the worker is running or not
+      this.rawCalendarWorker = undefined
+      this.formatedCalendarWorker = undefined
     }
   }
 
-  public compareSchedule = (newSched: IEventItem[], prevSched: any): boolean => {
+  /*
+   * Compares 2 schedules and checks to see it the relevant props match
+   * @return {boolean} true if everything matchs and false if there is a difference
+   */
+  private compareSchedule = (newSched: IEventItem[], prevSched: any): boolean => {
     let attributes = Object.keys(EventSkeleton)
     if (!prevSched) {
       return false
@@ -114,7 +111,7 @@ class Scheduler {
   /**
    * Sets the raw schedule
    */
-  private setRawSchedule = (): Promise<object[]> => {
+  public setRawSchedule = (): Promise<object[]> => {
     return new Promise((resolve, reject) => {
       this.calendar.events.list(
         {
@@ -127,37 +124,16 @@ class Scheduler {
           if (err) {
             reject(err)
           } else {
-            resolve(data.items || [])
+            this.rawSchedule = data.items || []
+            resolve(this.rawSchedule)
           }
         }
       )
     })
   }
 
-  public getCalendarList = () => {
-    return new Promise((resolve, reject) => {
-      try {
-        this.calendar.calendarList.list((err, res) => {
-          if (err) {
-            reject(err)
-            logError(err)
-          } else if(!res.data) {
-            let error = new Error('Cannot connect to Google Calendar')
-            reject(error)
-          }
-          resolve(res.data)
-        })
-      } catch (err) {
-        logError(err)
-        logError('Cannot Connect to Google Calendar')
-        this.socket.emit('error', { err })
-      }
-    })
-  }
-
-  private getSchedule = (): Promise<IEventItem[]> => {
-    return new Promise((resolve, reject) => {
-      resolve(this.rawSchedule.map((each: any, i): IEventItem => {
+  private getSchedule = (): IEventItem[] => {
+      return this.rawSchedule.map((each: any, i): IEventItem => {
         return (
           {
             key: i + 1,
@@ -168,8 +144,7 @@ class Scheduler {
             endTime: each.end.dateTime,
           }
         )
-      }))
-    })
+      })
   }
 }
 

@@ -5,12 +5,15 @@ import * as https from 'https'
 import * as io from 'socket.io'
 import * as Debug from 'debug'
 import { readFileSync } from 'fs'
+import { Set } from 'immutable'
 import * as oauth from './config/oauth.config'
 
 
 export const app = express()
 
-const debug = Debug('info')
+const logError = Debug('error')
+const debug = Debug('dev')
+const logInfo = Debug('info')
 
 app.use(cors({origin: true}))
 
@@ -27,35 +30,71 @@ const certOptions = {
 // Https Server
 export const server = https.createServer(certOptions, app)
 server.listen(port, () => {
-  debug(`Listening on port: ${port}`)
+  logInfo(`Listening on port: ${port}`)
   if (process.env.NODE_ENV === 'test') {
-    debug(`Socket: Listening on port: 8000`)
+    logInfo(`Socket: Listening on port: 8000`)
   }
 })
 
 // Websocket
-let socket: io.Server = process.env.NODE_ENV === 'test'
+let socketServer: io.Server = process.env.NODE_ENV === 'test'
   ? io.listen(8000)
   : io(server)
 
 // Get Creds for Google and open the connection
 let googleAuth
+let websocketConnection
+let connectedUsers: Set<string> = Set([])
+let connectedUser: string
 oauth.loadCredentials().then((auth) => {
-  socket.on('connection', (ws: io.Socket) => {
-    ws.emit('connect')
+  const scheduler = new Scheduler(auth)
 
-    const origin = ws.handshake.headers.origin
-    debug(`Connection created from origin: ${origin}`)
+  scheduler.setRawSchedule()
+    .then((rawSchedule) => {
+      // Starts the workers at server start up
+      if (connectedUsers.size !== 0) scheduler.initiateWorkers(true, socketServer)
 
-    const newSocket = new Scheduler(ws, auth)
-    ws.join('real-time-schedule', () => {
-      let rooms = Object.keys(ws.rooms)
-      debug(rooms)
+      // Checks if the user has disconnected
+      socketServer.on('connection', (ws: io.Socket) => {
+        websocketConnection = ws
+        ws.emit('connect')
+
+        ws.on('leave', (id) => {
+          //TODO: Check if that was the last user, if it was. turn off the workers
+          debug('Closing a connection...')
+          debug(`User ${id} just disconnected`)
+          connectedUsers = connectedUsers.remove(id)
+          if (connectedUsers.size === 0) {
+            debug(`No more users connected. Closing stopping workers`)
+            scheduler.initiateWorkers(false, null)
+            debug(scheduler.formatedCalendarWorker)
+          } else {
+            debug(`There are still ${connectedUsers.size} user(s) connected`)
+          }
+        })
+
+        // Debugging purposes
+        const origin = ws.handshake.headers.origin
+        debug(`Connection created from origin: ${origin}`)
+
+        // Adds the user to the group
+        ws.join('real-time-schedule', () => {
+          debug(Object.keys(ws.rooms)[0])
+          connectedUser = Object.keys(ws.rooms)[0]
+
+          ws.emit('notify_connection', connectedUser)
+
+          connectedUsers = connectedUsers.add(connectedUser)
+          debug(`There are ${connectedUsers.size} user(s) connected`)
+
+          // Check if a worker is running, if not, start it
+          if (!scheduler.rawCalendarWorker) scheduler.initiateWorkers(true, socketServer)
+        })
+
+      })
     })
-  })
-
-  socket.on('disconnect', () => {
-    debug(`${ this.socket.handshake.headers.origin } disconnected`)
-  })
+    .catch((err) => {
+      logError(err)
+    })
 })
 
