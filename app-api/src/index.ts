@@ -52,7 +52,7 @@ oauth.loadCredentials().then((auth) => {
   scheduler.setRawSchedule()
     .then((rawSchedule) => {
       // Starts the workers at server start up
-      if (connectedUsers.size !== 0) scheduler.initiateWorkers(true, socketServer)
+      if (connectedUsers.size !== 0) scheduler.workerManager(true, socketServer)
 
       // Checks if the user has disconnected
       socketServer.on('connection', (ws: io.Socket) => {
@@ -66,7 +66,7 @@ oauth.loadCredentials().then((auth) => {
           connectedUsers = connectedUsers.remove(id)
           if (connectedUsers.size === 0) {
             debug(`No more users connected. Closing stopping workers`)
-            scheduler.initiateWorkers(false, null)
+            scheduler.workerManager(false, null)
             debug(scheduler.formatedCalendarWorker)
           } else {
             debug(`There are still ${connectedUsers.size} user(s) connected`)
@@ -88,7 +88,7 @@ oauth.loadCredentials().then((auth) => {
           debug(`There are ${connectedUsers.size} user(s) connected`)
 
           // Check if a worker is running, if not, start it
-          if (!scheduler.rawCalendarWorker) scheduler.initiateWorkers(true, socketServer)
+          if (!scheduler.rawCalendarWorker) scheduler.workerManager(true, socketServer)
         })
 
       })

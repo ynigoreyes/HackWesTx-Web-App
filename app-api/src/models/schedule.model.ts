@@ -1,4 +1,3 @@
-// TODO: Once we start rejecting dispatches, we are getting Null errors in getSchedule
 import * as oauth from '../config/oauth.config'
 import * as io from 'socket.io'
 import { google } from 'googleapis'
@@ -9,7 +8,7 @@ const logError = Debug('error')
 const debug = Debug('dev')
 const logInfo = Debug('info')
 
-const dispatchFrequency = process.env.NODE_ENV === 'dev' ? 3000 : 2000
+const dispatchFrequency = process.env.NODE_ENV === 'dev' ? 100 : 100
 const fetchFrequency = process.env.NODE_ENV === 'dev' ? 5000 : 1000
 
 export interface IEventItem {
@@ -52,7 +51,7 @@ class Scheduler {
    * @parmas { boolean } controller - determines whether or not to start or stop the workers
    * @parmas { io.Server } socket - the server instance
    */
-  public initiateWorkers = async (controller: boolean, socket: io.Server) => {
+  public workerManager = async (controller: boolean, socket: io.Server) => {
     // When the user refreshed, we send them a packet initially
     if (controller && !this.workerPrevent) {
       debug('Starting workers...')
