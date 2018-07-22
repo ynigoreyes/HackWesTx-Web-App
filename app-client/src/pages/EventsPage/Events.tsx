@@ -1,6 +1,6 @@
 import * as React from 'react'
 import io from 'socket.io-client'
-import { Timeline, Icon } from 'antd'
+import { Spin, Timeline, Icon } from 'antd'
 import { connect } from 'react-redux'
 
 import './Events.css'
@@ -22,6 +22,7 @@ interface IEventsProps {
 
 interface IEventsState {
   TimeLineItems: IEventItem[],
+  loading: boolean,
 }
 
 export class Events extends React.Component<IEventsProps, IEventsState> {
@@ -34,20 +35,18 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
     this.socket.on('connect', () => {
       console.log('connected')
     })
+    this.watchSchedule()
     // initial state of no timeline items
     this.state = {
-      TimeLineItems: []
+      TimeLineItems: [],
+      loading: true,
     }
+
+    // Handles the reload
     window.onbeforeunload = () => {
       this.socket.emit('stop')
       this.socket.disconnect()
     }
-  }
-  
-  public componentDidMount() {
-    this.socket.on('ready', () => {
-      this.watchSchedule()
-    }) 
   }
 
   public componentWillUnmount() {
@@ -80,11 +79,21 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
   public render() {
     const { TimeLineItems } = this.state
-    return (
-      <main className="Events">
-        <Timeline>{TimeLineItems.map(this.formatDateAndComponent)}</Timeline>
-      </main>
-    )
+    if (this.state.loading) {
+      return (
+        <Spin size='large'/>
+      )
+    } else if (TimeLineItems.length === 0) {
+      return (
+        <main className="Events">No Events yet!!!</main>
+      )
+    } else {
+      return (
+        <main className="Events">
+            <Timeline>{TimeLineItems.map(this.formatDateAndComponent)}</Timeline>
+        </main>
+      )
+    }
   }
 
   /**
@@ -92,6 +101,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
    */
   private watchSchedule = () => {
     this.socket.on('update', ({schedule}) => {
+      window.log('Recieving schedule')
       const { currentTime } = this.props
 
       for(let prop in schedule) {
@@ -103,12 +113,12 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
           window.log('found one')
           schedule[prop].ongoing = true
           this.setState({
-            TimeLineItems: schedule
+            TimeLineItems: schedule,
+            loading: false,
           })
           break
         }
       }
-     
     })
   }
 }

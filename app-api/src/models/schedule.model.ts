@@ -8,6 +8,8 @@ const logError = Debug('error')
 const debug = Debug('dev')
 const logInfo = Debug('info')
 
+const updateFrequency = process.env.NODE_ENV === 'dev' ? 3000 : 1000 * 60
+
 export interface IEventItem {
   key: number | string
   title: string
@@ -41,7 +43,7 @@ class Scheduler {
   /**
    * Loads up the raw schedule into memory and turns on the event listeners
    */
-  constructor(currentConn: io.Socket) {
+  constructor(currentConn: io.Socket, auth) {
     this.socket = currentConn
     this.socket.on('stop', () => {
       logInfo('stopping worker...')
@@ -51,17 +53,16 @@ class Scheduler {
       clearInterval(this.rawCalendarWorker)
     })
 
-   oauth.loadCredentials().then(async (auth) => {
-      try {
-        this.calendar = google.calendar({ version: 'v3', auth })
-        this.rawSchedule = await this.setRawSchedule()
-        await this.IOready()
-        debug('Ready to send/recieve information')
+
+    this.calendar = google.calendar({ version: 'v3', auth })
+    this.setRawSchedule()
+      .then((schedule) => {
+        this.rawSchedule = schedule
         if (!this.workerPrevent) this.initiateWorkers()
-      } catch(err) {
+      })
+      .catch((err) => {
         logError(err)
-      }
-    })
+      })
   }
 
   public initiateWorkers = async() => {
@@ -74,7 +75,7 @@ class Scheduler {
 
       let previousFetch = await this.getSchedule()
       updateCalendar(this.socket, previousFetch)
-
+      debug(previousFetch)
       // Update the schedule and check if it changes
       this.formatedCalendarWorker = setInterval( async () => {
         this.schedule = await this.getSchedule()
@@ -86,7 +87,7 @@ class Scheduler {
         } else {
           debug('Rejecting...')
         }
-      }, 1000 * 45 )
+      }, updateFrequency )
     } catch(err) {
       logError(err)
       this.socket.emit('error', { err })
@@ -168,13 +169,6 @@ class Scheduler {
           }
         )
       }))
-    })
-  }
-
-  private IOready = (): Promise<object> => {
-    return new Promise((resolve, reject) => {
-      this.socket.emit('ready', { msg: 'ready to go' })
-      resolve()
     })
   }
 }
