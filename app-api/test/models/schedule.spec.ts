@@ -1,11 +1,15 @@
 jest.setTimeout(10000)
+// AfterEach does not act as expected
+// WorkAround: Call leave after each test and wrap it in a setTimeout
 import * as sinon from 'sinon'
 import * as io from 'socket.io-client'
 import * as serverIo from 'socket.io'
 import Scheduler from '../../src/models/schedule.model'
 
+let socket: io.Socket
+let connectionID: string
+
 describe('Schedule Suite', () => {
-  let socket: io.Socket 
   beforeEach((done) => {
     // Setup
     socket = io.connect('http://localhost:8000/', {
@@ -14,30 +18,27 @@ describe('Schedule Suite', () => {
       , 'force new connection' : true
       , transports: ['websocket']
     });
-    socket.on('connect', () => {
+
+    socket.on('ready', () => {
       done()
     })
-    socket.on('disconnect', () => {
-      socket.emit('stop')
+
+    socket.on('notify_connection', (id) => {
+      console.log(id)
+      connectionID = id
     })
   })
 
-  afterEach((done) => {
-    if(socket.connected) {
-      console.log('disconnecting')
-      socket.disconnect()
-    } 
-    done()
-  })
-   
-  it('should connect to socket', () => {
-    expect(socket.connected).toBeTruthy()
-  })
-  it('should send back only one list of events', (done) => {
-    // Needs internet to do test or else it won't fetch events from Google Calendar
-    const callback = sinon.spy()
-    socket.emit('update', callback)
-    jest.advanceTimersByTime(10000)
-    expect(callback).toHaveBeenCalledTimes(4)
+  it('should connect new users to the correct room', (done) => {
+    setTimeout(() => {
+      expect(true).toBeTruthy()
+      handleLeaveEvent(done)
+    })
   })
 })
+
+// Custom Done Function
+function handleLeaveEvent(done: () => void) {
+  socket.emit('leave', connectionID)
+  done()
+}

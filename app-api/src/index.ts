@@ -41,11 +41,13 @@ let socketServer: io.Server = process.env.NODE_ENV === 'test'
   ? io.listen(8000)
   : io(server)
 
+
 // Get Creds for Google and open the connection
 let googleAuth
-let websocketConnection
-let connectedUsers: Set<string> = Set([])
+export let websocketConnection
+export let connectedUsers: Set<string> = Set([])
 let connectedUser: string
+
 oauth.loadCredentials().then((auth) => {
   const scheduler = new Scheduler(auth)
 
@@ -59,8 +61,26 @@ oauth.loadCredentials().then((auth) => {
         websocketConnection = ws
         ws.emit('connect')
 
+        // Debugging purposes
+        const origin = ws.handshake.headers.origin
+        debug(`Connection created from origin: ${origin}`)
+
+        // Adds the user to the group
+        ws.join('real-time-schedule', () => {
+          debug(Object.keys(ws.rooms)[0])
+          connectedUser = Object.keys(ws.rooms)[0]
+
+          ws.emit('notify_connection', connectedUser)
+          ws.emit('ready')
+
+          connectedUsers = connectedUsers.add(connectedUser)
+          debug(`There are ${connectedUsers.size} user(s) connected`)
+
+          // Check if a worker is running, if not, start it
+          if (!scheduler.rawCalendarWorker) scheduler.workerManager(true, socketServer)
+        })
+
         ws.on('leave', (id) => {
-          //TODO: Check if that was the last user, if it was. turn off the workers
           debug('Closing a connection...')
           debug(`User ${id} just disconnected`)
           connectedUsers = connectedUsers.remove(id)
@@ -72,25 +92,6 @@ oauth.loadCredentials().then((auth) => {
             debug(`There are still ${connectedUsers.size} user(s) connected`)
           }
         })
-
-        // Debugging purposes
-        const origin = ws.handshake.headers.origin
-        debug(`Connection created from origin: ${origin}`)
-
-        // Adds the user to the group
-        ws.join('real-time-schedule', () => {
-          debug(Object.keys(ws.rooms)[0])
-          connectedUser = Object.keys(ws.rooms)[0]
-
-          ws.emit('notify_connection', connectedUser)
-
-          connectedUsers = connectedUsers.add(connectedUser)
-          debug(`There are ${connectedUsers.size} user(s) connected`)
-
-          // Check if a worker is running, if not, start it
-          if (!scheduler.rawCalendarWorker) scheduler.workerManager(true, socketServer)
-        })
-
       })
     })
     .catch((err) => {
