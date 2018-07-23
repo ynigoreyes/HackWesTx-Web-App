@@ -2,18 +2,14 @@
   "compilerOptions": {
     "lib": ["es6", "dom"],
     "module": "commonjs",
+    "moduleResolution": "node",
     "noImplicitReturns": true,
-    "rootDir": "src",
     "allowJs": true,
     "pretty": true,
     "outDir": "dist",
     "inlineSourceMap": true,
-    "target": "es5"
+    "target": "es5",
+    "rootDir": "src"
   },
-  "compileOnSave": true,
-  "include": ["src", "*.json", "*d.ts"],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.*"
-  ]
+  "include": ["src/**/*", "*.d.ts"]
 }
