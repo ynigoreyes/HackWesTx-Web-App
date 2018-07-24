@@ -7,7 +7,8 @@
     "exec": "docker exec -it hackwestx-web-app_app_1 sh",
     "debug": "nodemon inspect --require ts-node/register src/index.ts",
     "test": "jest test",
-    "prune": "node yarn-prune.js",
+    "docker": "gcloud container builds submit --config cloudbuild.yaml .",
+    "ssh": "cd && cd Documents/Keys && bash ssh-acm.sh",
     "coverage": "jest --collectCoverageFrom=src/**.ts --coverage test"
   },
   "dependencies": {

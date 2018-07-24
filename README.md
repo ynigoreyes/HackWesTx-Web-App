@@ -4,8 +4,6 @@
 * React-Typescript
 * Semantic UI
 * Firebase
-  * Store (???)
-  * Auth
   * Functions
   * Hosting
 * Yarn v1.7
@@ -87,4 +85,9 @@ $ yarn test
 /index.tsx {*or App.tsx*}
 
 $ yarn start
+```
+
+To deploy, ssh into EC2 instance and run
+```
+$ sudo docker stack deploy -c docker-compose.yml acm
 ```
