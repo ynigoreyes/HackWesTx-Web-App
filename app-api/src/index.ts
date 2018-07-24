@@ -17,10 +17,23 @@ const logInfo = Debug('info')
 
 app.use(cors({origin: true}))
 
+app.get('/', (req, res) => {
+  res.send('Cannot Access API from here')
+})
+
 export default app
 const port = process.env.PORT || 8080
-const keyPath = process.env.CERT_PATH + 'server.key'
-const certPath = process.env.CERT_PATH + 'server.crt'
+let keyPath: string
+let certPath: string
+if (process.env.NODE_ENV !== 'prod') {
+  // Use local creds
+  keyPath = process.env.CERT_PATH + 'server.key'
+  certPath = process.env.CERT_PATH + 'server.crt'
+} else {
+  // Will use the EC2 certifications
+  keyPath = process.env.CERT_PATH + 'privkey.pem'
+  certPath = process.env.CERT_PATH + 'fullchain.pem'
+}
 
 const certOptions = {
   key: readFileSync(keyPath),

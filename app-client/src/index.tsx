@@ -11,7 +11,7 @@ import './index.css'
 import { Provider } from 'react-redux'
 import { store, history } from './redux/store'
 import AppLayout from './pages/AppLayout'
-import { ConnectedRouter as Router } from 'connected-react-router' 
+import { ConnectedRouter as Router } from 'connected-react-router'
 
 ReactDOM.render(
   <Provider store={store}>
