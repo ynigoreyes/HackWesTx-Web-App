@@ -94,36 +94,46 @@ export class Events extends React.Component<{}, IEventsState> {
    * Will update the current schedule when a new schedule is fetched
    */
   private watchSchedule = () => {
-    const currentTime = Date.now()
     this.socket.on('update', ({schedule}) => {
+    let updateSchedule = false
+    const currentTime = Date.now()
+    const { EventItems } = this.state
 
       for(let prop in schedule) {
         let startTime = new Date(schedule[prop].startTime).getTime()
         let endTime = new Date(schedule[prop].endTime).getTime()
 
+        // Determines what events are ongoing
         if (startTime < currentTime && endTime > currentTime) {
           schedule[prop].ongoing = true
         }
 
-        if (this.state.EventItems.length === 0) {
-          window.log('No state yet')
-          this.setState({
-            EventItems: schedule,
-            loading: false,
-          })
-        } else if (
-          this.state.EventItems[prop].title === schedule[prop].title &&
-          this.state.EventItems[prop].content === schedule[prop].content &&
-          this.state.EventItems[prop].startTime === schedule[prop].startTime &&
-          this.state.EventItems[prop].endTime === schedule[prop].endTime
-        ) {
-          window.log('No changes found, rejecting state change')
-        } else {
-          this.setState({
-            EventItems: schedule,
-            loading: false,
-          })
+        // Use an if block to make sure that we don't overwrite a change event,
+        // but still checking for all ongoing events
+        if (!updateSchedule) {
+          // If the user is receiving data for the first time or if we add/remove an event
+          if (EventItems.length === 0 || EventItems.length !== schedule.length) {
+            window.log('No state yet')
+            updateSchedule = true
+          } else if (
+            // Is the content the same?
+            EventItems[prop].title === schedule[prop].title &&
+            EventItems[prop].content === schedule[prop].content &&
+            EventItems[prop].startTime === schedule[prop].startTime &&
+            EventItems[prop].endTime === schedule[prop].endTime
+          ) {
+            window.log('No changes found, rejecting state change')
+          } else {
+            // If there is something different with the schedule
+            updateSchedule = true
+          }
         }
+      }
+      if (updateSchedule) {
+        this.setState({
+          EventItems: schedule,
+          loading: false,
+        })
       }
     })
   }
