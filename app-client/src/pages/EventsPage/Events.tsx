@@ -1,7 +1,8 @@
 import * as React from 'react'
 import io from 'socket.io-client'
-import { Spin, Timeline, Icon } from 'antd'
+import { Spin, Timeline } from 'antd'
 import { connect } from 'react-redux'
+import TimeLineItem from './components/TimeLineItemComponent/TimeLineItem'
 
 import './Events.css'
 
@@ -10,8 +11,8 @@ export interface IEventItem {
   title: string
   ongoing: boolean
   content: string
-  startTime: number
-  endTime: number
+  startTime?: number
+  endTime?: number
 }
 
 interface IEventsProps {
@@ -21,7 +22,7 @@ interface IEventsProps {
 }
 
 interface IEventsState {
-  TimeLineItems: IEventItem[],
+  EventItems: IEventItem[],
   loading: boolean,
 }
 
@@ -30,6 +31,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   private socket: io.Socket
   private id: string
 
+  // Handle opening all connections
   constructor(props) {
     super(props)
     this.socket = io.connect('https://acmttu.org:3000')
@@ -44,7 +46,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
     // initial state of no timeline items
     this.state = {
-      TimeLineItems: [],
+      EventItems: [],
       loading: true,
     }
 
@@ -66,38 +68,29 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
    */
   public formatDateAndComponent = (eachEvent: IEventItem) => {
     return (
-      <Timeline.Item
-        className="EventItem"
+      <TimeLineItem
         key={eachEvent.key}
-        color={eachEvent.ongoing
-          ? 'green'
-          : 'blue'}
-        dot={
-          eachEvent.ongoing
-          ? <Icon type="clock-circle-o" style={{ fontSize: '16px' }} />
-          : null
-        }
-      >
-        <h2>{eachEvent.title}</h2>
-        <p>{eachEvent.content}</p>
-      </Timeline.Item>
+        ongoing={eachEvent.ongoing}
+        title={eachEvent.title}
+        content={eachEvent.content}
+      />
     )
   }
 
   public render() {
-    const { TimeLineItems } = this.state
+    const { EventItems } = this.state
     if (this.state.loading) {
       return (
         <Spin size='large'/>
       )
-    } else if (TimeLineItems.length === 0) {
+    } else if (EventItems.length === 0) {
       return (
         <main className="Events">No Events yet!!!</main>
       )
     } else {
       return (
         <main className="Events">
-            <Timeline>{TimeLineItems.map(this.formatDateAndComponent)}</Timeline>
+            <Timeline>{EventItems.map(this.formatDateAndComponent)}</Timeline>
         </main>
       )
     }
@@ -120,7 +113,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
           window.log('found one')
           schedule[prop].ongoing = true
           this.setState({
-            TimeLineItems: schedule,
+            EventItems: schedule,
             loading: false,
           })
           break

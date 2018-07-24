@@ -6,6 +6,8 @@ window.log = debug('dev')
 window.error = debug('error')
 window.info = debug('info')
 
+window.log(process.env)
+
 import './index.css'
 
 import { Provider } from 'react-redux'
