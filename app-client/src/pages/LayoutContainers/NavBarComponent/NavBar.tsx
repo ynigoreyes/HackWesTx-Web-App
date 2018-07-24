@@ -4,7 +4,6 @@ const AntHeader = AntLayout.Header
 
 import { connect } from "react-redux";
 import { push } from "react-router-redux";
-import { updateCurrentTime } from '../../../redux/actions/global.actions'
 
 import banner from '../../../assets/HackWesTxBannerTransparent.png'
 
@@ -12,7 +11,6 @@ interface INavBarProps {
   navigateTo: (newLocation) => void,
   updateCurrentTime: (time) => void,
   location: string,
-  currentTime: Date,
 }
 
 interface INavBarState {
@@ -43,12 +41,6 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
 
   public handleRoute = (option) => {
     this.props.navigateTo(option.key)
-  }
-
-  public checkTime = (): void => {
-    this.tracker = setInterval(() => {
-      this.props.updateCurrentTime(Date.now())
-    }, 1000)
   }
 
   /**
@@ -118,7 +110,6 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
   // LifeCycle
   public componentDidMount() {
     this.updateScreenState()
-    this.checkTime()
     window.addEventListener('resize', this.updateScreenState)
   }
   public componentWillUnmount() {
@@ -129,15 +120,11 @@ class NavBar extends React.Component<INavBarProps, INavBarState> {
 
 const mapStateToProps = (state) => ({
   location: state.router.location.pathname,
-  currentTime: state.currentTime,
 })
 
 const mapDispatchToProps = (dispatch) => ({
   navigateTo: (location) => {
     dispatch(push(location))
-  },
-  updateCurrentTime: (time) => {
-    dispatch(updateCurrentTime(time))
   },
 })
 

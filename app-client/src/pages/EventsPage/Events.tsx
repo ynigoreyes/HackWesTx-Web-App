@@ -1,7 +1,6 @@
 import * as React from 'react'
 import io from 'socket.io-client'
 import { Spin, Timeline } from 'antd'
-import { connect } from 'react-redux'
 import TimeLineItem from './components/TimeLineItemComponent/TimeLineItem'
 
 import './Events.css'
@@ -15,18 +14,12 @@ export interface IEventItem {
   endTime?: number
 }
 
-interface IEventsProps {
-  dispatch?: any
-  currentTime: number
-  history?: any
-}
-
 interface IEventsState {
   EventItems: IEventItem[],
   loading: boolean,
 }
 
-export class Events extends React.Component<IEventsProps, IEventsState> {
+export class Events extends React.Component<{}, IEventsState> {
 
   private socket: io.Socket
   private id: string
@@ -66,19 +59,20 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
   /**
    *  Formats the timeline to show the current event
    */
-  public formatDateAndComponent = (eachEvent: IEventItem) => {
+  public formatDateAndComponent = ({key, ongoing, title, content}) => {
     return (
       <TimeLineItem
-        key={eachEvent.key}
-        ongoing={eachEvent.ongoing}
-        title={eachEvent.title}
-        content={eachEvent.content}
+        key={key}
+        ongoing={ongoing}
+        title={title}
+        content={content}
       />
     )
   }
 
   public render() {
     const { EventItems } = this.state
+
     if (this.state.loading) {
       return (
         <Spin size='large'/>
@@ -100,33 +94,39 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
    * Will update the current schedule when a new schedule is fetched
    */
   private watchSchedule = () => {
+    const currentTime = Date.now()
     this.socket.on('update', ({schedule}) => {
-      window.log('Recieving schedule')
-      const { currentTime } = this.props
 
       for(let prop in schedule) {
-
         let startTime = new Date(schedule[prop].startTime).getTime()
         let endTime = new Date(schedule[prop].endTime).getTime()
 
         if (startTime < currentTime && endTime > currentTime) {
-          window.log('found one')
           schedule[prop].ongoing = true
+        }
+
+        if (this.state.EventItems.length === 0) {
+          window.log('No state yet')
           this.setState({
             EventItems: schedule,
             loading: false,
           })
-          break
+        } else if (
+          this.state.EventItems[prop].title === schedule[prop].title &&
+          this.state.EventItems[prop].content === schedule[prop].content &&
+          this.state.EventItems[prop].startTime === schedule[prop].startTime &&
+          this.state.EventItems[prop].endTime === schedule[prop].endTime
+        ) {
+          window.log('No changes found, rejecting state change')
+        } else {
+          this.setState({
+            EventItems: schedule,
+            loading: false,
+          })
         }
       }
     })
   }
 }
 
-const state = (state) => {
-  return {
-    currentTime: state.currentTime,
-  }
-}
-
-export default connect(state)(Events)
+export default Events

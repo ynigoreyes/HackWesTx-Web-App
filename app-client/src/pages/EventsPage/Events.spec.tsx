@@ -7,7 +7,7 @@ import { Events } from './Events'
 describe('Event Suite', () => {
   let wrapper: ReactWrapper
   beforeAll(() => {
-    return (wrapper = mount(<Events currentTime={0} />))
+    return (wrapper = mount(<Events />))
   })
   it('should mount', () => {
     expect(wrapper.exists()).toBe(true)

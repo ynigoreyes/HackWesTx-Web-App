@@ -2,7 +2,7 @@ import * as React from 'react'
 import GridItem from './components/SponsorGridItem'
 import { Row } from 'antd'
 
-class Sponsors extends React.Component<{}, {}> {
+class Sponsors extends React.PureComponent<{}, {}> {
   constructor(props) {
     super(props)
   }
