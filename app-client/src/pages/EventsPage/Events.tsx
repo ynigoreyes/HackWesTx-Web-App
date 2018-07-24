@@ -32,7 +32,7 @@ export class Events extends React.Component<IEventsProps, IEventsState> {
 
   constructor(props) {
     super(props)
-    this.socket = io.connect('https://acmttu.org:3000')
+    this.socket = io.connect('https://18.219.213.205:3000')
     this.socket.on('connect', () => {
       window.log('connected')
     })
