@@ -1,0 +1,19 @@
+{
+  "extends": ["tslint-react"],
+  "rules": {
+    // override tslint-react rules here
+    "jsx-wrap-multiline": false,
+    "jsx-no-multiline-js": false,
+    "jsx-boolean-value": false,
+    "quotemark": false,
+    "no-submodule-imports": false,
+    "semicolon": false,
+    "no-console": false,
+    "ordered-imports": false,
+    "no-empty-interface": false,
+    "object-literal-sort-keys": false,
+    "prefer-const": false,
+    "forin": false,
+    "no-shadowed-variable": false
+  }
+}

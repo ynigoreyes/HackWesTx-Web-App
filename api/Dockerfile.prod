@@ -1,0 +1,38 @@
+# TODO: Install production deps using yarn. yarn --prod is broken
+FROM node:10.6.0 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN yarn
+RUN yarn global add typescript@2.9.2
+
+RUN tsc
+
+# Production build
+FROM node:10.6.0-alpine
+
+ENV CERT_PATH /app/certs/
+ENV NODE_ENV prod
+ENV DEBUG info,error
+ENV CALENDAR_ID v714lm6ajiage7kk224k9e8td4@group.calendar.google.com
+
+WORKDIR /app
+
+# This is a local file
+# TODO: figure out how to install CA using apk
+# Replace this with a volume on the EC2 instance
+# COPY ./certs ./certs
+
+RUN mkdir certs
+
+COPY --from=builder /build/dist ./dist
+COPY --from=builder /build/package.json .
+COPY --from=builder /build/node_modules ./node_modules
+
+ARG PORT=8080
+
+EXPOSE ${PORT}
+
+CMD ["node", "/app/dist/index.js"]

@@ -1,0 +1,15 @@
+.Layout.ant-layout {
+  .Content.ant-layout-content {
+    margin: 140px  0px 0px 0px;
+    background-color: 'black';
+    width: 100%;
+  }
+}
+
+@media(max-width: 767px) {
+  .Layout.ant-layout {
+    .Content.ant-layout-content {
+      margin: 108px 0px 0px 0px;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/hackwestx-production-211122/hackwestx-api', '-f', 'Dockerfile.prod', '.' ]
+  env: ['PORT=3000']
+images:
+- 'gcr.io/hackwestx-production-211122/hackwestx-api'
