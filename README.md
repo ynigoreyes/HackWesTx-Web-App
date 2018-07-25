@@ -87,7 +87,10 @@ $ yarn test
 $ yarn start
 ```
 
-To deploy, ssh into EC2 instance and run
+To deploy, ssh into EC2 instance, log into Google Cloud - Container Builder and run
 ```
-$ sudo docker stack deploy -c docker-compose.yml acm
+$ gcloud auth login
+$ gcloud config set project [PROJECT_ID]
+$ gcloud auth configure-docker
+$ sudo docker stack deploy --with-registry-auth -c docker-compose.yml acm
 ```
